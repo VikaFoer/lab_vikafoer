@@ -4,6 +4,8 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -281,7 +283,14 @@ int main() {
     std::cout << "════════════════════════════════════════" << std::endl;
     std::cout << std::endl;
 
-    MainServer server(8080);
+    // Читаємо порт з змінної оточення (для Railway, Heroku тощо)
+    int port = 8080;
+    const char* portEnv = std::getenv("PORT");
+    if (portEnv != nullptr) {
+        port = std::atoi(portEnv);
+    }
+
+    MainServer server(port);
     
     std::thread serverThread([&server]() {
         server.start();

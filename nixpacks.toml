@@ -1,0 +1,9 @@
+[phases.setup]
+nixPkgs = ["gcc", "g++"]
+
+[phases.build]
+cmds = ["g++ -std=c++17 main_server.cpp -o main_server -pthread"]
+
+[start]
+cmd = "./main_server"
+

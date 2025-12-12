@@ -1,0 +1,2 @@
+web: ./main_server
+
