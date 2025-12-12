@@ -1027,8 +1027,6 @@ private:
                                     json << "]";
                                 }
                                 json << "],";
-                                json << "\"transformedMatrix\":[";
-                                
                                 json << "\"details\":[";
                                 
                                 // Обробляємо кожен рядок
