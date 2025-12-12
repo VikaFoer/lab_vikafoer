@@ -306,38 +306,36 @@ private:
                                 double outerArea = c * d;
                                 double areaRatio = (innerArea / outerArea) * 100.0;
                                 
-                                // Формуємо JSON відповідь
+                                // Формуємо JSON відповідь (формат для lab2)
                                 std::ostringstream json;
                                 json << std::fixed << std::setprecision(4);
                                 json << "{";
                                 json << "\"success\":true,";
                                 json << "\"canFit\":" << (canFit ? "true" : "false") << ",";
-                                json << "\"fitsWithoutRotation\":" << (fitsWithoutRotation ? "true" : "false") << ",";
-                                json << "\"fitsWithRotation\":" << (fitsWithRotation ? "true" : "false") << ",";
-                                json << "\"innerRectangle\":{";
-                                json << "\"sideA\":" << a << ",";
-                                json << "\"sideB\":" << b << ",";
+                                json << "\"rectangle1\":{";
+                                json << "\"side1\":" << a << ",";
+                                json << "\"side2\":" << b << ",";
                                 json << "\"area\":" << innerArea;
                                 json << "},";
-                                json << "\"outerRectangle\":{";
-                                json << "\"sideC\":" << c << ",";
-                                json << "\"sideD\":" << d << ",";
+                                json << "\"rectangle2\":{";
+                                json << "\"side1\":" << c << ",";
+                                json << "\"side2\":" << d << ",";
                                 json << "\"area\":" << outerArea;
                                 json << "},";
-                                json << "\"areaRatio\":" << areaRatio << ",";
-                                json << "\"recommendation\":\"";
-                                if (canFit) {
-                                    if (fitsWithoutRotation && fitsWithRotation) {
-                                        json << "Прямокутник поміщається в обох орієнтаціях";
-                                    } else if (fitsWithoutRotation) {
-                                        json << "Прямокутник поміщається без повороту";
-                                    } else {
-                                        json << "Прямокутник поміщається з поворотом на 90°";
-                                    }
-                                } else {
-                                    json << "Прямокутник не поміщається";
-                                }
-                                json << "\"";
+                                json << "\"variants\":{";
+                                json << "\"variant1\":{";
+                                json << "\"description\":\"a паралельно c, b паралельно d\",";
+                                json << "\"possible\":" << (fitsWithoutRotation ? "true" : "false") << ",";
+                                json << "\"condition\":\"a <= c && b <= d\",";
+                                json << "\"check\":\"" << a << " <= " << c << " && " << b << " <= " << d << "\"";
+                                json << "},";
+                                json << "\"variant2\":{";
+                                json << "\"description\":\"a паралельно d, b паралельно c\",";
+                                json << "\"possible\":" << (fitsWithRotation ? "true" : "false") << ",";
+                                json << "\"condition\":\"a <= d && b <= c\",";
+                                json << "\"check\":\"" << a << " <= " << d << " && " << b << " <= " << c << "\"";
+                                json << "}";
+                                json << "}";
                                 json << "}";
                                 
                                 sendResponse(clientSocket, json.str(), "application/json");
