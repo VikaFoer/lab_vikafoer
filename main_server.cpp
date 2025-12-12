@@ -463,6 +463,122 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab4
+                    if (labNum == "lab4" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо реверсування для lab4
+                        if (params.find("number") != params.end()) {
+                            try {
+                                long long number = std::stoll(params.at("number"));
+                                
+                                // Функція для реверсування цифр
+                                auto reverseDigits = [](long long num) -> long long {
+                                    long long reversed = 0;
+                                    bool isNegative = num < 0;
+                                    
+                                    if (isNegative) {
+                                        num = -num;
+                                    }
+                                    
+                                    while (num > 0) {
+                                        reversed = reversed * 10 + (num % 10);
+                                        num /= 10;
+                                    }
+                                    
+                                    return isNegative ? -reversed : reversed;
+                                };
+                                
+                                // Функція для отримання цифр як рядка
+                                auto getDigitsAsString = [](long long num) -> std::string {
+                                    std::string digits;
+                                    bool isNegative = num < 0;
+                                    
+                                    if (isNegative) {
+                                        num = -num;
+                                    }
+                                    
+                                    if (num == 0) {
+                                        return "0";
+                                    }
+                                    
+                                    while (num > 0) {
+                                        digits = std::to_string(num % 10) + digits;
+                                        num /= 10;
+                                    }
+                                    
+                                    return isNegative ? "-" + digits : digits;
+                                };
+                                
+                                long long reversed = reverseDigits(number);
+                                std::string originalDigits = getDigitsAsString(number);
+                                std::string reversedDigits = getDigitsAsString(reversed);
+                                
+                                // Формуємо JSON відповідь
+                                std::ostringstream json;
+                                json << std::fixed;
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"original\":{";
+                                json << "\"number\":" << number << ",";
+                                json << "\"digits\":\"" << originalDigits << "\"";
+                                json << "},";
+                                json << "\"reversed\":{";
+                                json << "\"number\":" << reversed << ",";
+                                json << "\"digits\":\"" << reversedDigits << "\"";
+                                json << "},";
+                                json << "\"isNegative\":" << (number < 0 ? "true" : "false") << ",";
+                                json << "\"digitCount\":" << originalDigits.length() - (number < 0 ? 1 : 0);
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
