@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const labs = [
         { number: 1, title: 'Лабораторна робота 1', description: 'Задача про зустріч двох автомобілів', status: 'active' },
         { number: 2, title: 'Лабораторна робота 2', description: 'Перевірка поміщення прямокутників', status: 'active' },
-        { number: 3, title: 'Лабораторна робота 3', description: 'В розробці', status: 'pending' },
-        { number: 4, title: 'Лабораторна робота 4', description: 'В розробці', status: 'pending' },
+        { number: 3, title: 'Лабораторна робота 3', description: 'Перевірка належності точки трикутнику', status: 'active' },
+        { number: 4, title: 'Лабораторна робота 4', description: 'Реверсування порядку цифр числа', status: 'active' },
         { number: 5, title: 'Лабораторна робота 5', description: 'В розробці', status: 'pending' },
         { number: 6, title: 'Лабораторна робота 6', description: 'В розробці', status: 'pending' },
         { number: 7, title: 'Лабораторна робота 7', description: 'В розробці', status: 'pending' },
