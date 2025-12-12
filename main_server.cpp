@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+#include <functional>
 
 #ifdef _WIN32
 #include <winsock2.h>
