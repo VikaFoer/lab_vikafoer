@@ -1629,6 +1629,161 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab12
+                    if (labNum == "lab12" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab12 (фільтрація послідовності)
+                        if (params.find("n") != params.end()) {
+                            try {
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_N = 1;
+                                const int MAX_N = 100;
+                                
+                                if (n < MIN_N || n > MAX_N) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 100]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо послідовність
+                                std::vector<double> originalArray;
+                                for (int i = 0; i < n; ++i) {
+                                    std::string key = "a" + std::to_string(i + 1);
+                                    if (params.find(key) == params.end()) {
+                                        sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів послідовності\"}", "application/json");
+                                        return;
+                                    }
+                                    double value = std::stod(params.at(key));
+                                    originalArray.push_back(value);
+                                }
+                                
+                                // Функція для обчислення середнього через покажчики
+                                auto calculateAverage = [](double* arr, int size) -> double {
+                                    if (size == 0) return 0.0;
+                                    double sum = 0.0;
+                                    double* ptr = arr;
+                                    for (int i = 0; i < size; ++i) {
+                                        sum += *ptr;
+                                        ptr++;
+                                    }
+                                    return sum / size;
+                                };
+                                
+                                // Обчислюємо середнє через покажчики
+                                double average = calculateAverage(originalArray.data(), n);
+                                const double TOLERANCE = 0.10; // 10%
+                                double lowerBound = average * (1.0 - TOLERANCE);
+                                double upperBound = average * (1.0 + TOLERANCE);
+                                
+                                // Фільтруємо через покажчики
+                                std::vector<double> filteredArray;
+                                double* ptr = originalArray.data();
+                                for (int i = 0; i < n; ++i) {
+                                    double value = *ptr;
+                                    // Видаляємо елементи, що відрізняються не більш ніж на 10%
+                                    // Тобто залишаємо ті, що відрізняються більш ніж на 10%
+                                    if (!(value >= lowerBound && value <= upperBound)) {
+                                        filteredArray.push_back(value);
+                                    }
+                                    ptr++;
+                                }
+                                
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(6);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"n\":" << n << ",";
+                                json << "\"average\":" << average << ",";
+                                json << "\"tolerance\":" << TOLERANCE << ",";
+                                json << "\"lowerBound\":" << lowerBound << ",";
+                                json << "\"upperBound\":" << upperBound << ",";
+                                json << "\"originalArray\":[";
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << originalArray[i];
+                                }
+                                json << "],";
+                                json << "\"filteredArray\":[";
+                                for (size_t i = 0; i < filteredArray.size(); ++i) {
+                                    if (i > 0) json << ",";
+                                    json << filteredArray[i];
+                                }
+                                json << "],";
+                                json << "\"removedCount\":" << (n - static_cast<int>(filteredArray.size())) << ",";
+                                json << "\"remainingCount\":" << filteredArray.size() << ",";
+                                json << "\"details\":[";
+                                
+                                ptr = originalArray.data();
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    double value = *ptr;
+                                    double deviation = std::abs(value - average);
+                                    double deviationPercent = (deviation / average) * 100.0;
+                                    bool inRange = (value >= lowerBound && value <= upperBound);
+                                    
+                                    json << "{";
+                                    json << "\"index\":" << i << ",";
+                                    json << "\"value\":" << value << ",";
+                                    json << "\"deviation\":" << deviation << ",";
+                                    json << "\"deviationPercent\":" << deviationPercent << ",";
+                                    json << "\"inRange\":" << (inRange ? "true" : "false");
+                                    json << "}";
+                                    
+                                    ptr++;
+                                }
+                                
+                                json << "]";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";

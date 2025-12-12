@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна робота 12 - Фільтрація послідовності</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 12 - Фільтрація послідовності за відхиленням від середнього</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab12></span>
+                    <span class="command">array_filter.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Фільтрація послідовності за відхиленням від середнього ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Дано натуральне число n і послідовність дійсних чисел a₁, a₂, …, aₙ.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Отримати нову послідовність, вилучивши з первинної</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">всі члени зі значеннями, що відрізняються від</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">середнього арифметичного не більш ніж на 10%.</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Для доступу до елементів масиву використовуються покажчики.</span>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Введення послідовності</h3>
+                        <div class="form-group">
+                            <label for="n">Кількість елементів n:</label>
+                            <input type="number" id="n" name="n" min="1" max="100" step="1" required 
+                                   placeholder="Наприклад: 10">
+                            <small class="form-hint">Діапазон: від 1 до 100</small>
+                        </div>
+                        <button type="button" id="generateSequenceBtn" class="btn-generate">Створити поля для послідовності</button>
+                        <div id="sequenceInputs" class="sequence-inputs"></div>
+                        <button type="submit" class="btn-calculate" style="display: none;">Фільтрувати</button>
+                    </div>
+                </form>
+
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
