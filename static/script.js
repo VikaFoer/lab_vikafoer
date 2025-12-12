@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Дані про лабораторні роботи
     const labs = [
         { number: 1, title: 'Лабораторна робота 1', description: 'Задача про зустріч двох автомобілів', status: 'active' },
-        { number: 2, title: 'Лабораторна робота 2', description: 'Консольний інтерфейс', status: 'active' },
+        { number: 2, title: 'Лабораторна робота 2', description: 'Перевірка поміщення прямокутників', status: 'active' },
         { number: 3, title: 'Лабораторна робота 3', description: 'В розробці', status: 'pending' },
         { number: 4, title: 'Лабораторна робота 4', description: 'В розробці', status: 'pending' },
         { number: 5, title: 'Лабораторна робота 5', description: 'В розробці', status: 'pending' },
