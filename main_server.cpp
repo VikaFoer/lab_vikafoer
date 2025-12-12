@@ -296,11 +296,21 @@ int main() {
         server.start();
     });
 
+    // На Railway/сервері просто чекаємо, поки сервер працює
+    // На локальній машині можна використовувати std::cin.get()
+    #ifdef _WIN32
     std::cout << "Натисніть Enter для зупинки сервера...\n";
     std::cin.get();
+    #else
+    // На Linux/сервері просто чекаємо
+    std::cout << "Сервер працює. Натисніть Ctrl+C для зупинки.\n";
+    serverThread.join();
+    #endif
 
     server.stop();
-    serverThread.join();
+    if (serverThread.joinable()) {
+        serverThread.join();
+    }
 
     return 0;
 }
