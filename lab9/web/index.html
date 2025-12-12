@@ -3,29 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 9</title>
+    <title>Лабораторна робота 9 - Довершені числа</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Лабораторна робота 9</h1>
-            <p>Веб-інтерфейс з C++ бекендом</p>
-        </header>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 9 - Пошук відрізків з довершених чисел</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab9></span>
+                    <span class="command">perfect_numbers.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Пошук відрізків з довершених чисел ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Дано натуральне число n, цілі числа a1, a2, …, an.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Знайти всі відрізки послідовності з членів,</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">які йдуть підряд і складаються з довершених чисел.</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Довершене число = сумі всіх дільників, менших від самого числа.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Приклади: 6 (1+2+3=6), 28 (1+2+4+7+14=28)</span>
+                </div>
+            </div>
 
-        <main>
-            <section class="card">
-                <h2>Лабораторна робота 9</h2>
-                <p>Тут буде реалізовано функціональність для лабораторної роботи 9.</p>
-            </section>
-        </main>
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Введення послідовності</h3>
+                        <div class="form-group">
+                            <label for="n">Кількість елементів n:</label>
+                            <input type="number" id="n" name="n" min="1" max="100" step="1" required 
+                                   placeholder="Наприклад: 10">
+                            <small class="form-hint">Діапазон: від 1 до 100</small>
+                        </div>
+                        <button type="button" id="generateSequenceBtn" class="btn-generate">Створити поля для послідовності</button>
+                        <div id="sequenceInputs" class="sequence-inputs"></div>
+                        <button type="submit" class="btn-calculate" style="display: none;">Знайти відрізки</button>
+                    </div>
+                </form>
 
-        <footer>
-            <p>Лабораторні роботи з C++ та веб-інтерфейсом</p>
-        </footer>
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-

@@ -1092,6 +1092,202 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab9
+                    if (labNum == "lab9" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab9 (пошук відрізків з довершених чисел)
+                        if (params.find("n") != params.end()) {
+                            try {
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_N = 1;
+                                const int MAX_N = 100;
+                                
+                                if (n < MIN_N || n > MAX_N) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 100]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо послідовність
+                                std::vector<int> sequence;
+                                for (int i = 0; i < n; ++i) {
+                                    std::string key = "a" + std::to_string(i + 1);
+                                    if (params.find(key) == params.end()) {
+                                        sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів послідовності\"}", "application/json");
+                                        return;
+                                    }
+                                    sequence.push_back(std::stoi(params.at(key)));
+                                }
+                                
+                                // Функція для перевірки довершеності числа
+                                auto isPerfect = [](int num) -> bool {
+                                    if (num < 1) return false;
+                                    if (num == 1) return false;
+                                    int sum = 0;
+                                    for (int i = 1; i < num; ++i) {
+                                        if (num % i == 0) {
+                                            sum += i;
+                                        }
+                                    }
+                                    return sum == num;
+                                };
+                                
+                                // Функція для отримання дільників
+                                auto getDivisors = [](int num) -> std::vector<int> {
+                                    std::vector<int> divisors;
+                                    for (int i = 1; i < num; ++i) {
+                                        if (num % i == 0) {
+                                            divisors.push_back(i);
+                                        }
+                                    }
+                                    return divisors;
+                                };
+                                
+                                // Перевіряємо кожен елемент
+                                std::vector<bool> perfectFlags(n);
+                                for (int i = 0; i < n; ++i) {
+                                    perfectFlags[i] = isPerfect(sequence[i]);
+                                }
+                                
+                                // Знаходимо відрізки
+                                std::ostringstream json;
+                                json << std::fixed;
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"n\":" << n << ",";
+                                json << "\"sequence\":[";
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << sequence[i];
+                                }
+                                json << "],";
+                                json << "\"perfectFlags\":[";
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << (perfectFlags[i] ? "true" : "false");
+                                }
+                                json << "],";
+                                json << "\"divisorsInfo\":[";
+                                
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    auto divisors = getDivisors(sequence[i]);
+                                    int divisorsSum = 0;
+                                    for (int div : divisors) {
+                                        divisorsSum += div;
+                                    }
+                                    json << "{";
+                                    json << "\"number\":" << sequence[i] << ",";
+                                    json << "\"divisors\":[";
+                                    for (size_t j = 0; j < divisors.size(); ++j) {
+                                        if (j > 0) json << ",";
+                                        json << divisors[j];
+                                    }
+                                    json << "],";
+                                    json << "\"divisorsSum\":" << divisorsSum << ",";
+                                    json << "\"isPerfect\":" << (perfectFlags[i] ? "true" : "false");
+                                    json << "}";
+                                }
+                                
+                                json << "],";
+                                json << "\"segments\":[";
+                                
+                                // Знаходимо відрізки
+                                bool firstSegment = true;
+                                int start = -1;
+                                for (int i = 0; i < n; ++i) {
+                                    if (perfectFlags[i]) {
+                                        if (start == -1) {
+                                            start = i;
+                                        }
+                                    } else {
+                                        if (start != -1) {
+                                            if (!firstSegment) json << ",";
+                                            firstSegment = false;
+                                            json << "{";
+                                            json << "\"start\":" << start << ",";
+                                            json << "\"end\":" << (i - 1) << ",";
+                                            json << "\"length\":" << (i - start) << ",";
+                                            json << "\"elements\":[";
+                                            for (int j = start; j < i; ++j) {
+                                                if (j > start) json << ",";
+                                                json << sequence[j];
+                                            }
+                                            json << "]";
+                                            json << "}";
+                                            start = -1;
+                                        }
+                                    }
+                                }
+                                
+                                // Перевіряємо останній відрізок
+                                if (start != -1) {
+                                    if (!firstSegment) json << ",";
+                                    json << "{";
+                                    json << "\"start\":" << start << ",";
+                                    json << "\"end\":" << (n - 1) << ",";
+                                    json << "\"length\":" << (n - start) << ",";
+                                    json << "\"elements\":[";
+                                    for (int j = start; j < n; ++j) {
+                                        if (j > start) json << ",";
+                                        json << sequence[j];
+                                    }
+                                    json << "]";
+                                    json << "}";
+                                }
+                                
+                                json << "]";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
