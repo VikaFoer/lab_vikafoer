@@ -55,6 +55,24 @@ body {
 .console-controls {
     display: flex;
     gap: 8px;
+    align-items: center;
+}
+
+.back-btn {
+    color: #4ec9b0;
+    text-decoration: none;
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid #4ec9b0;
+    border-radius: 3px;
+    transition: all 0.2s;
+    margin-right: 8px;
+}
+
+.back-btn:hover {
+    background: #4ec9b0;
+    color: #1e1e1e;
+    transform: translateX(-2px);
 }
 
 .control-btn {
