@@ -899,7 +899,6 @@ private:
                                     json << originalArray[i];
                                 }
                                 json << "],";
-                                json << "\"resultArray\":[";
                                 json << "\"steps\":[";
                                 
                                 bool firstStep = true;
