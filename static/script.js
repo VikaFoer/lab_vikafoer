@@ -55,32 +55,51 @@ document.addEventListener('DOMContentLoaded', function() {
     const splashScreen = document.getElementById('splashScreen');
     const mainContainer = document.getElementById('mainContainer');
     
-    // Ініціалізація матричного ефекту
-    initMatrix();
+    // Перевірка, чи користувач вже бачив splash screen в цій сесії
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
     
-    // Обробка натискання Enter
-    function handleEnter() {
+    if (hasSeenSplash === 'true') {
+        // Якщо вже бачив, одразу показуємо основний контент
         if (splashScreen) {
-            splashScreen.classList.add('hidden');
-            setTimeout(() => {
-                splashScreen.style.display = 'none';
-                if (mainContainer) {
-                    mainContainer.style.display = 'flex';
-                }
-            }, 500);
+            splashScreen.style.display = 'none';
         }
-    }
-    
-    // Слухачі подій
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            handleEnter();
+        if (mainContainer) {
+            mainContainer.style.display = 'flex';
         }
-    });
-    
-    // Клік по екрану також закриває початковий екран
-    if (splashScreen) {
-        splashScreen.addEventListener('click', handleEnter);
+        // Ініціалізація матричного ефекту на фоні
+        initMatrix();
+    } else {
+        // Якщо перший раз, показуємо splash screen
+        // Ініціалізація матричного ефекту
+        initMatrix();
+        
+        // Обробка натискання Enter
+        function handleEnter() {
+            if (splashScreen) {
+                // Зберігаємо інформацію про те, що користувач вже бачив splash screen
+                sessionStorage.setItem('hasSeenSplash', 'true');
+                
+                splashScreen.classList.add('hidden');
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    if (mainContainer) {
+                        mainContainer.style.display = 'flex';
+                    }
+                }, 500);
+            }
+        }
+        
+        // Слухачі подій
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                handleEnter();
+            }
+        });
+        
+        // Клік по екрану також закриває початковий екран
+        if (splashScreen) {
+            splashScreen.addEventListener('click', handleEnter);
+        }
     }
     
     // Показ основного контенту після закриття початкового екрану
