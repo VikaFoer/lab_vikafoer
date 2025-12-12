@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна робота 2 - Консоль</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 2 - C++ Server</span>
+            </div>
+            <div class="console-controls">
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab2></span>
+                    <span class="command">server.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Лабораторна робота 2 ===</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Сервер запущено на http://localhost:8080</span>
+                </div>
+                <div class="console-line">
+                    <span class="output success">✓ Сервер готовий до прийому запитів</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Відкрийте браузер і перейдіть на http://localhost:8080</span>
+                </div>
+            </div>
+            <div class="console-input-line">
+                <span class="prompt">C:\LAB__C++\lab2></span>
+                <input type="text" class="console-input" id="consoleInput" autocomplete="off" spellcheck="false" placeholder="Введіть команду...">
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background: #0c0c0c;
+    color: #cccccc;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.console-container {
+    width: 100%;
+    max-width: 900px;
+    height: 600px;
+    background: #1e1e1e;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.console-header {
+    background: #2d2d30;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3c3c3c;
+    user-select: none;
+}
+
+.console-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #cccccc;
+    font-size: 13px;
+}
+
+.console-icon {
+    color: #4ec9b0;
+    font-weight: bold;
+}
+
+.console-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.control-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #505050;
+    color: transparent;
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.control-btn:hover {
+    background: #606060;
+}
+
+.console-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #1e1e1e;
+}
+
+.console-output {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.console-output::-webkit-scrollbar {
+    width: 10px;
+}
+
+.console-output::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.console-output::-webkit-scrollbar-thumb {
+    background: #3c3c3c;
+    border-radius: 5px;
+}
+
+.console-output::-webkit-scrollbar-thumb:hover {
+    background: #4c4c4c;
+}
+
+.console-line {
+    margin-bottom: 4px;
+    word-wrap: break-word;
+}
+
+.prompt {
+    color: #4ec9b0;
+    font-weight: bold;
+}
+
+.command {
+    color: #dcdcaa;
+}
+
+.output {
+    color: #cccccc;
+}
+
+.output.success {
+    color: #4ec9b0;
+}
+
+.output.error {
+    color: #f48771;
+}
+
+.output.warning {
+    color: #dcdcaa;
+}
+
+.console-input-line {
+    padding: 10px 15px;
+    background: #252526;
+    border-top: 1px solid #3c3c3c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.console-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #cccccc;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    outline: none;
+}
+
+.console-input::placeholder {
+    color: #6a6a6a;
+}
+
+/* Анімація курсора */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.console-input-line::after {
+    content: '';
+}
+
+/* Ефект типізації */
+.typing {
+    border-right: 2px solid #4ec9b0;
+    animation: blink 1s infinite;
+}
