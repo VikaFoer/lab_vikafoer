@@ -1,11 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const consoleInput = document.getElementById('consoleInput');
+    const form = document.getElementById('calculationForm');
+    const resultsContainer = document.getElementById('results');
+    const resultsContent = document.getElementById('resultsContent');
     const consoleOutput = document.getElementById('consoleOutput');
-    
-    // Фокус на інпут при завантаженні
-    consoleInput.focus();
-    
-    // Додавання нових рядків у консоль
+
     function addConsoleLine(text, className = 'output') {
         const line = document.createElement('div');
         line.className = 'console-line';
@@ -16,83 +14,138 @@ document.addEventListener('DOMContentLoaded', function() {
         consoleOutput.appendChild(line);
         consoleOutput.scrollTop = consoleOutput.scrollHeight;
     }
-    
-    // Обробка команд
-    function processCommand(command) {
-        const cmd = command.trim().toLowerCase();
-        
-        if (cmd === '') {
-            return;
-        }
-        
-        // Показати введену команду
-        const commandLine = document.createElement('div');
-        commandLine.className = 'console-line';
-        commandLine.innerHTML = '<span class="prompt">C:\\LAB__C++\\lab2></span> <span class="command">' + command + '</span>';
-        consoleOutput.appendChild(commandLine);
-        
-        // Обробка різних команд
-        if (cmd === 'help' || cmd === '?') {
-            addConsoleLine('');
-            addConsoleLine('Доступні команди:');
-            addConsoleLine('  help, ?          - Показати цю довідку');
-            addConsoleLine('  clear, cls        - Очистити консоль');
-            addConsoleLine('  status            - Статус сервера');
-            addConsoleLine('  info              - Інформація про сервер');
-            addConsoleLine('  exit, quit        - Закрити сервер');
-            addConsoleLine('');
-        } else if (cmd === 'clear' || cmd === 'cls') {
-            consoleOutput.innerHTML = '';
-            addConsoleLine('Консоль очищено', 'output success');
-        } else if (cmd === 'status') {
-            addConsoleLine('Статус: Сервер працює', 'output success');
-            addConsoleLine('Порт: 8080', 'output');
-            addConsoleLine('URL: http://localhost:8080', 'output');
-        } else if (cmd === 'info') {
-            addConsoleLine('');
-            addConsoleLine('=== Інформація про сервер ===');
-            addConsoleLine('Версія: 1.0.0');
-            addConsoleLine('Мова: C++17');
-            addConsoleLine('Платформа: Windows');
-            addConsoleLine('Протокол: HTTP/1.1');
-            addConsoleLine('');
-        } else if (cmd === 'exit' || cmd === 'quit') {
-            addConsoleLine('Зупинка сервера...', 'output warning');
-            addConsoleLine('Сервер зупинено', 'output error');
-        } else {
-            addConsoleLine('Невідома команда: ' + command + '. Введіть "help" для списку команд.', 'output error');
-        }
-        
-        consoleOutput.scrollTop = consoleOutput.scrollHeight;
-    }
-    
-    // Обробка натискання Enter
-    consoleInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const command = consoleInput.value;
-            processCommand(command);
-            consoleInput.value = '';
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Отримуємо значення з форми
+        const a = parseFloat(document.getElementById('a').value);
+        const b = parseFloat(document.getElementById('b').value);
+        const c = parseFloat(document.getElementById('c').value);
+        const d = parseFloat(document.getElementById('d').value);
+
+        // Додаємо запит у консоль
+        addConsoleLine(`Внутрішній прямокутник: a = ${a}, b = ${b}`, 'output');
+        addConsoleLine(`Зовнішній прямокутник: c = ${c}, d = ${d}`, 'output');
+        addConsoleLine('Виконую перевірку...', 'output');
+
+        // Формуємо параметри для запиту
+        const params = new URLSearchParams({
+            a: a.toString(),
+            b: b.toString(),
+            c: c.toString(),
+            d: d.toString()
+        });
+
+        try {
+            const response = await fetch('/lab2/api/calculate?' + params.toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Перевірка чи відповідь успішна
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Отримуємо текст перед парсингом JSON
+            const text = await response.text();
+            console.log('Response text:', text);
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Response text:', text);
+                throw new Error('Помилка парсингу JSON: ' + e.message);
+            }
+
+            if (data.error) {
+                addConsoleLine(`Помилка: ${data.error}`, 'output error');
+                resultsContent.innerHTML = `<div class="result-error">Помилка: ${data.error}</div>`;
+                resultsContainer.style.display = 'block';
+                return;
+            }
+
+            if (data.success) {
+                addConsoleLine('=== РЕЗУЛЬТАТИ ===', 'output');
+                
+                // Формуємо HTML для результатів
+                let html = '';
+
+                // Статус поміщення
+                const statusClass = data.canFit ? 'yes' : 'no';
+                const statusText = data.canFit ? '✓ ПРЯМОКУТНИК ПОМІЩАЄТЬСЯ' : '✗ ПРЯМОКУТНИК НЕ ПОМІЩАЄТЬСЯ';
+                html += `<div class="fit-status ${statusClass}">${statusText}</div>`;
+
+                // Детальна інформація
+                html += `<div class="result-item">
+                    <div class="result-label">Рекомендація:</div>
+                    <div class="result-value">${data.recommendation}</div>
+                </div>`;
+
+                html += `<div class="rectangle-info">
+                    <h4>Внутрішній прямокутник:</h4>
+                    <div class="result-item">
+                        <div class="result-label">Сторона a:</div>
+                        <div class="result-value">${data.innerRectangle.sideA.toFixed(4)}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Сторона b:</div>
+                        <div class="result-value">${data.innerRectangle.sideB.toFixed(4)}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Площа:</div>
+                        <div class="result-value">${data.innerRectangle.area.toFixed(4)}</div>
+                    </div>
+                </div>`;
+
+                html += `<div class="rectangle-info">
+                    <h4>Зовнішній прямокутник:</h4>
+                    <div class="result-item">
+                        <div class="result-label">Сторона c:</div>
+                        <div class="result-value">${data.outerRectangle.sideC.toFixed(4)}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Сторона d:</div>
+                        <div class="result-value">${data.outerRectangle.sideD.toFixed(4)}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Площа:</div>
+                        <div class="result-value">${data.outerRectangle.area.toFixed(4)}</div>
+                    </div>
+                </div>`;
+
+                html += `<div class="result-item">
+                    <div class="result-label">Варіанти поміщення:</div>
+                    <div class="result-value">
+                        Без повороту: ${data.fitsWithoutRotation ? '✓ Так' : '✗ Ні'}<br>
+                        З поворотом на 90°: ${data.fitsWithRotation ? '✓ Так' : '✗ Ні'}
+                    </div>
+                </div>`;
+
+                html += `<div class="result-item">
+                    <div class="result-label">Відношення площ:</div>
+                    <div class="result-value">${data.areaRatio.toFixed(2)}%</div>
+                </div>`;
+
+                resultsContent.innerHTML = html;
+                resultsContainer.style.display = 'block';
+
+                if (data.canFit) {
+                    addConsoleLine(`Результат: ${data.recommendation}`, 'output success');
+                } else {
+                    addConsoleLine('Результат: Прямокутник не поміщається', 'output error');
+                }
+            }
+
+        } catch (error) {
+            addConsoleLine(`Помилка: ${error.message}`, 'output error');
+            resultsContent.innerHTML = `<div class="result-error">Помилка з'єднання: ${error.message}</div>`;
+            resultsContainer.style.display = 'block';
         }
     });
-    
-    // Запобігання втраті фокусу
-    consoleInput.addEventListener('blur', function() {
-        setTimeout(() => consoleInput.focus(), 10);
-    });
-    
-    // Додати курсор до інпуту
-    function updateCursor() {
-        if (document.activeElement === consoleInput) {
-            consoleInput.style.borderRight = '2px solid #4ec9b0';
-        } else {
-            consoleInput.style.borderRight = 'none';
-        }
-    }
-    
-    setInterval(updateCursor, 500);
-    
-    // Додаткові повідомлення при завантаженні
-    setTimeout(() => {
-        addConsoleLine('Введіть "help" для списку доступних команд', 'output');
-    }, 1000);
 });

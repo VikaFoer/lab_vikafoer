@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 2 - Консоль</title>
+    <title>Лабораторна робота 2 - Прямокутники</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
         <div class="console-header">
             <div class="console-title">
                 <span class="console-icon">▶</span>
-                <span>Лабораторна робота 2 - C++ Server</span>
+                <span>Лабораторна робота 2 - Перевірка поміщення прямокутників</span>
             </div>
             <div class="console-controls">
                 <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
@@ -24,24 +24,62 @@
             <div class="console-output" id="consoleOutput">
                 <div class="console-line">
                     <span class="prompt">C:\LAB__C++\lab2></span>
-                    <span class="command">server.exe</span>
+                    <span class="command">rectangle_fit.exe</span>
                 </div>
                 <div class="console-line">
-                    <span class="output">=== Лабораторна робота 2 ===</span>
+                    <span class="output">=== Перевірка поміщення прямокутників ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Задача: Чи можна прямокутник зі сторонами a і b</span>
                 </div>
                 <div class="console-line">
-                    <span class="output">Сервер запущено на http://localhost:8080</span>
+                    <span class="output">повністю помістити всередині прямокутника зі сторонами c, d?</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Обмеження: сторони можуть бути тільки паралельними</span>
                 </div>
                 <div class="console-line">
-                    <span class="output success">✓ Сервер готовий до прийому запитів</span>
-                </div>
-                <div class="console-line">
-                    <span class="output">Відкрийте браузер і перейдіть на http://localhost:8080</span>
+                    <span class="output">або перпендикулярними (поворот на 90° дозволено)</span>
                 </div>
             </div>
-            <div class="console-input-line">
-                <span class="prompt">C:\LAB__C++\lab2></span>
-                <input type="text" class="console-input" id="consoleInput" autocomplete="off" spellcheck="false" placeholder="Введіть команду...">
+
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="rectangles-section">
+                        <div class="rectangle-group">
+                            <h3 class="rectangle-title">Внутрішній прямокутник</h3>
+                            <div class="form-group">
+                                <label for="a">Сторона a:</label>
+                                <input type="number" id="a" name="a" step="0.001" min="0.001" max="1000000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="b">Сторона b:</label>
+                                <input type="number" id="b" name="b" step="0.001" min="0.001" max="1000000" required>
+                            </div>
+                        </div>
+
+                        <div class="rectangle-group">
+                            <h3 class="rectangle-title">Зовнішній прямокутник</h3>
+                            <div class="form-group">
+                                <label for="c">Сторона c:</label>
+                                <input type="number" id="c" name="c" step="0.001" min="0.001" max="1000000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="d">Сторона d:</label>
+                                <input type="number" id="d" name="d" step="0.001" min="0.001" max="1000000" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-calculate">Перевірити</button>
+                </form>
+
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
             </div>
         </div>
     </div>

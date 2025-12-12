@@ -234,11 +234,125 @@ private:
                         }
                     } else {
                         sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
-                        return;
+                            return;
+                        }
                     }
-                }
-                
-                // Обробка статичних файлів
+                    
+                    // Обробка API endpoint для lab2
+                    if (labNum == "lab2" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо перевірку для lab2
+                        if (params.size() >= 4) {
+                            try {
+                                double a = std::stod(params.at("a"));
+                                double b = std::stod(params.at("b"));
+                                double c = std::stod(params.at("c"));
+                                double d = std::stod(params.at("d"));
+                                
+                                const double MIN_SIZE = 0.001;
+                                const double MAX_SIZE = 1000000.0;
+                                
+                                if (a < MIN_SIZE || a > MAX_SIZE ||
+                                    b < MIN_SIZE || b > MAX_SIZE ||
+                                    c < MIN_SIZE || c > MAX_SIZE ||
+                                    d < MIN_SIZE || d > MAX_SIZE) {
+                                    sendResponse(clientSocket, "{\"error\":\"Значення поза допустимим діапазоном\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Перевірка чи можна помістити прямокутник
+                                bool fitsWithoutRotation = (a <= c && b <= d);
+                                bool fitsWithRotation = (a <= d && b <= c);
+                                bool canFit = fitsWithoutRotation || fitsWithRotation;
+                                
+                                double innerArea = a * b;
+                                double outerArea = c * d;
+                                double areaRatio = (innerArea / outerArea) * 100.0;
+                                
+                                // Формуємо JSON відповідь
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(4);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"canFit\":" << (canFit ? "true" : "false") << ",";
+                                json << "\"fitsWithoutRotation\":" << (fitsWithoutRotation ? "true" : "false") << ",";
+                                json << "\"fitsWithRotation\":" << (fitsWithRotation ? "true" : "false") << ",";
+                                json << "\"innerRectangle\":{";
+                                json << "\"sideA\":" << a << ",";
+                                json << "\"sideB\":" << b << ",";
+                                json << "\"area\":" << innerArea;
+                                json << "},";
+                                json << "\"outerRectangle\":{";
+                                json << "\"sideC\":" << c << ",";
+                                json << "\"sideD\":" << d << ",";
+                                json << "\"area\":" << outerArea;
+                                json << "},";
+                                json << "\"areaRatio\":" << areaRatio << ",";
+                                json << "\"recommendation\":\"";
+                                if (canFit) {
+                                    if (fitsWithoutRotation && fitsWithRotation) {
+                                        json << "Прямокутник поміщається в обох орієнтаціях";
+                                    } else if (fitsWithoutRotation) {
+                                        json << "Прямокутник поміщається без повороту";
+                                    } else {
+                                        json << "Прямокутник поміщається з поворотом на 90°";
+                                    }
+                                } else {
+                                    json << "Прямокутник не поміщається";
+                                }
+                                json << "\"";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
+                    // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
                 }
