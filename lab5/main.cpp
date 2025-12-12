@@ -7,6 +7,7 @@
 #include <map>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 #ifdef _WIN32
 #include <winsock2.h>
