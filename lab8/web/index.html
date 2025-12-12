@@ -3,29 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 8</title>
+    <title>Лабораторна робота 8 - Перетворення матриці</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Лабораторна робота 8</h1>
-            <p>Веб-інтерфейс з C++ бекендом</p>
-        </header>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 8 - Перетворення матриці</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab8></span>
+                    <span class="command">matrix_transform.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Перетворення матриці ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Дано натуральні числа m, n і цілочислову матрицю розміру m×n.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Змінити матрицю так, щоб у рядках залишилися</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">елементи, які зустрічаються більше одного разу,</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">а інші замінити нулями.</span>
+                </div>
+            </div>
 
-        <main>
-            <section class="card">
-                <h2>Лабораторна робота 8</h2>
-                <p>Тут буде реалізовано функціональність для лабораторної роботи 8.</p>
-            </section>
-        </main>
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Введення матриці</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="m">Кількість рядків m:</label>
+                                <input type="number" id="m" name="m" min="1" max="20" step="1" required 
+                                       placeholder="Наприклад: 3">
+                            </div>
+                            <div class="form-group">
+                                <label for="n">Кількість стовпців n:</label>
+                                <input type="number" id="n" name="n" min="1" max="20" step="1" required 
+                                       placeholder="Наприклад: 4">
+                            </div>
+                        </div>
+                        <button type="button" id="generateMatrixBtn" class="btn-generate">Створити матрицю</button>
+                        <div id="matrixInputs" class="matrix-inputs"></div>
+                        <button type="submit" class="btn-calculate" style="display: none;">Обчислити</button>
+                    </div>
+                </form>
 
-        <footer>
-            <p>Лабораторні роботи з C++ та веб-інтерфейсом</p>
-        </footer>
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-

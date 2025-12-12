@@ -940,6 +940,159 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab8
+                    if (labNum == "lab8" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab8 (перетворення матриці)
+                        if (params.find("m") != params.end() && params.find("n") != params.end()) {
+                            try {
+                                int m = std::stoi(params.at("m"));
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_SIZE = 1;
+                                const int MAX_SIZE = 20;
+                                
+                                if (m < MIN_SIZE || m > MAX_SIZE || n < MIN_SIZE || n > MAX_SIZE) {
+                                    sendResponse(clientSocket, "{\"error\":\"m та n мають бути в діапазоні [1; 20]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо матрицю
+                                std::vector<std::vector<int>> originalMatrix(m, std::vector<int>(n));
+                                for (int i = 0; i < m; ++i) {
+                                    for (int j = 0; j < n; ++j) {
+                                        std::string key = "mat" + std::to_string(i) + "_" + std::to_string(j);
+                                        if (params.find(key) == params.end()) {
+                                            sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів матриці\"}", "application/json");
+                                            return;
+                                        }
+                                        originalMatrix[i][j] = std::stoi(params.at(key));
+                                    }
+                                }
+                                
+                                // Створюємо перетворену матрицю
+                                std::vector<std::vector<int>> transformedMatrix(m, std::vector<int>(n));
+                                
+                                std::ostringstream json;
+                                json << std::fixed;
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"m\":" << m << ",";
+                                json << "\"n\":" << n << ",";
+                                json << "\"originalMatrix\":[";
+                                for (int i = 0; i < m; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << "[";
+                                    for (int j = 0; j < n; ++j) {
+                                        if (j > 0) json << ",";
+                                        json << originalMatrix[i][j];
+                                    }
+                                    json << "]";
+                                }
+                                json << "],";
+                                json << "\"transformedMatrix\":[";
+                                
+                                json << "\"details\":[";
+                                
+                                // Обробляємо кожен рядок
+                                for (int i = 0; i < m; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << "[";
+                                    
+                                    // Підраховуємо кількість входжень кожного елемента в рядку
+                                    std::map<int, int> countMap;
+                                    for (int j = 0; j < n; ++j) {
+                                        countMap[originalMatrix[i][j]]++;
+                                    }
+                                    
+                                    // Створюємо перетворений рядок
+                                    for (int j = 0; j < n; ++j) {
+                                        if (j > 0) json << ",";
+                                        
+                                        int value = originalMatrix[i][j];
+                                        int count = countMap[value];
+                                        
+                                        if (count > 1) {
+                                            transformedMatrix[i][j] = value;
+                                        } else {
+                                            transformedMatrix[i][j] = 0;
+                                        }
+                                        
+                                        json << "{";
+                                        json << "\"row\":" << i << ",";
+                                        json << "\"col\":" << j << ",";
+                                        json << "\"originalValue\":" << value << ",";
+                                        json << "\"count\":" << count << ",";
+                                        json << "\"transformedValue\":" << transformedMatrix[i][j] << ",";
+                                        json << "\"changed\":" << (count > 1 ? 0 : 1);
+                                        json << "}";
+                                    }
+                                    json << "]";
+                                }
+                                
+                                json << "],";
+                                json << "\"transformedMatrix\":[";
+                                for (int i = 0; i < m; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << "[";
+                                    for (int j = 0; j < n; ++j) {
+                                        if (j > 0) json << ",";
+                                        json << transformedMatrix[i][j];
+                                    }
+                                    json << "]";
+                                }
+                                json << "]";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
