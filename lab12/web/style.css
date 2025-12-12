@@ -326,7 +326,7 @@ body {
 
 .stats-info {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
     margin: 15px 0;
 }
@@ -352,28 +352,53 @@ body {
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
-.stat-value.removed {
-    color: #f48771;
+.average-display {
+    background: #1e1e1e;
+    border: 2px solid #4ec9b0;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 15px 0;
+    text-align: center;
 }
 
-.range-info {
-    background: #1e1e1e;
+.average-label {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.average-value {
+    font-size: 28px;
+    font-weight: bold;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    color: #4ec9b0;
+}
+
+.bounds-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 10px 0;
+}
+
+.bound-item {
+    background: #252526;
     border: 1px solid #3c3c3c;
     border-radius: 4px;
-    padding: 15px;
-    margin: 15px 0;
-    border-left: 3px solid #4ec9b0;
+    padding: 10px;
+    text-align: center;
 }
 
-.range-info h4 {
-    color: #4ec9b0;
-    margin-bottom: 10px;
+.bound-label {
+    color: #888;
+    font-size: 11px;
+    margin-bottom: 5px;
 }
 
-.range-item {
-    color: #cccccc;
-    font-size: 13px;
-    margin: 5px 0;
+.bound-value {
+    color: #dcdcaa;
+    font-size: 14px;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
@@ -409,18 +434,16 @@ body {
     position: relative;
 }
 
-.sequence-value.kept {
-    border-color: #4ec9b0;
-    color: #4ec9b0;
-    background: rgba(78, 201, 176, 0.1);
-}
-
 .sequence-value.removed {
     border-color: #f48771;
     color: #f48771;
     background: rgba(244, 135, 113, 0.1);
     text-decoration: line-through;
-    opacity: 0.6;
+}
+
+.sequence-value.kept {
+    border-color: #4ec9b0;
+    color: #4ec9b0;
 }
 
 .sequence-value.index {
@@ -460,12 +483,14 @@ body {
     background: #252526;
 }
 
-.detail-kept {
-    color: #4ec9b0;
-}
-
 .detail-removed {
     color: #f48771;
+    font-weight: bold;
+}
+
+.detail-kept {
+    color: #4ec9b0;
+    font-weight: bold;
 }
 
 .result-error {
@@ -484,5 +509,8 @@ body {
     .stats-info {
         grid-template-columns: 1fr;
     }
+    
+    .bounds-info {
+        grid-template-columns: 1fr;
+    }
 }
-

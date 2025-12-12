@@ -1784,6 +1784,150 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab12
+                    if (labNum == "lab12" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab12 (фільтрація послідовності)
+                        if (params.find("n") != params.end()) {
+                            try {
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_N = 1;
+                                const int MAX_N = 100;
+                                
+                                if (n < MIN_N || n > MAX_N) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 100]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо послідовність
+                                std::vector<double> originalArray;
+                                for (int i = 0; i < n; ++i) {
+                                    std::string key = "a" + std::to_string(i + 1);
+                                    if (params.find(key) == params.end()) {
+                                        sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів послідовності\"}", "application/json");
+                                        return;
+                                    }
+                                    double value = std::stod(params.at(key));
+                                    originalArray.push_back(value);
+                                }
+                                
+                                // Використовуємо покажчики для доступу до елементів
+                                double* arrPtr = originalArray.data();
+                                
+                                // Обчислюємо середнє арифметичне через покажчики
+                                double sum = 0.0;
+                                for (int i = 0; i < n; ++i) {
+                                    sum += *(arrPtr + i);
+                                }
+                                double average = sum / n;
+                                
+                                // Фільтруємо масив через покажчики
+                                const double threshold = 0.10; // 10%
+                                std::vector<double> resultArray;
+                                
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(6);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"n\":" << n << ",";
+                                json << "\"average\":" << average << ",";
+                                json << "\"thresholdPercent\":10.0,";
+                                json << "\"lowerBound\":" << (average * 0.9) << ",";
+                                json << "\"upperBound\":" << (average * 1.1) << ",";
+                                json << "\"originalArray\":[";
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << originalArray[i];
+                                }
+                                json << "],";
+                                json << "\"resultArray\":[";
+                                json << "\"details\":[";
+                                
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    
+                                    double value = *(arrPtr + i);
+                                    double diff = std::abs(value - average);
+                                    double percentDiff = (average != 0) ? (diff / std::abs(average)) : 0.0;
+                                    bool shouldKeep = percentDiff > threshold;
+                                    
+                                    if (shouldKeep) {
+                                        resultArray.push_back(value);
+                                    }
+                                    
+                                    json << "{";
+                                    json << "\"index\":" << i << ",";
+                                    json << "\"value\":" << value << ",";
+                                    json << "\"average\":" << average << ",";
+                                    json << "\"difference\":" << diff << ",";
+                                    json << "\"percentDifference\":" << (percentDiff * 100.0) << ",";
+                                    json << "\"threshold\":10.0,";
+                                    json << "\"shouldKeep\":" << (shouldKeep ? "true" : "false") << ",";
+                                    json << "\"removed\":" << (!shouldKeep ? "true" : "false");
+                                    json << "}";
+                                }
+                                
+                                json << "],";
+                                json << "\"resultArray\":[";
+                                for (size_t i = 0; i < resultArray.size(); ++i) {
+                                    if (i > 0) json << ",";
+                                    json << resultArray[i];
+                                }
+                                json << "],";
+                                json << "\"removedCount\":" << (n - static_cast<int>(resultArray.size())) << ",";
+                                json << "\"remainingCount\":" << resultArray.size();
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";

@@ -115,12 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="stat-value">${data.average.toFixed(6)}</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Діапазон (±10%)</div>
-                        <div class="stat-value">[${data.lowerBound.toFixed(6)}, ${data.upperBound.toFixed(6)}]</div>
-                    </div>
-                    <div class="stat-item">
                         <div class="stat-label">Видалено елементів</div>
-                        <div class="stat-value removed">${data.removedCount}</div>
+                        <div class="stat-value" style="color: #f48771;">${data.removedCount}</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Залишилось елементів</div>
@@ -128,13 +124,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>`;
 
-                // Інформація про діапазон
-                html += `<div class="range-info">
-                    <h4>Діапазон допустимих значень:</h4>
-                    <div class="range-item">Середнє: ${data.average.toFixed(6)}</div>
-                    <div class="range-item">Допустиме відхилення: ±10%</div>
-                    <div class="range-item">Нижня межа: ${data.lowerBound.toFixed(6)}</div>
-                    <div class="range-item">Верхня межа: ${data.upperBound.toFixed(6)}</div>
+                // Діапазон (середнє ± 10%)
+                html += `<div class="bounds-info">
+                    <div class="bound-item">
+                        <div class="bound-label">Нижня межа (середнє - 10%)</div>
+                        <div class="bound-value">${data.lowerBound.toFixed(6)}</div>
+                    </div>
+                    <div class="bound-item">
+                        <div class="bound-label">Верхня межа (середнє + 10%)</div>
+                        <div class="bound-value">${data.upperBound.toFixed(6)}</div>
+                    </div>
                 </div>`;
 
                 // Відображення вихідної послідовності
@@ -143,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="sequence-values">`;
                 for (let i = 0; i < data.originalArray.length; ++i) {
                     const detail = data.details[i];
-                    const className = detail.inRange ? 'kept' : 'removed';
+                    const className = detail.removed ? 'removed' : 'kept';
                     html += `<div class="sequence-value ${className}">
                         <span class="index">${i}</span>
                         ${data.originalArray[i].toFixed(6)}
@@ -151,12 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 html += `</div></div>`;
 
-                // Відображення відфільтрованої послідовності
+                // Відображення результуючої послідовності
                 html += `<div class="sequence-display">
-                    <div class="sequence-display-label">Відфільтрована послідовність (видалені елементи, що відрізняються не більш ніж на 10%)</div>
+                    <div class="sequence-display-label">Результуюча послідовність (видалено елементи, що відрізняються ≤ 10%)</div>
                     <div class="sequence-values">`;
-                if (data.filteredArray.length > 0) {
-                    data.filteredArray.forEach((val) => {
+                if (data.resultArray.length > 0) {
+                    data.resultArray.forEach((val) => {
                         html += `<div class="sequence-value kept">${val.toFixed(6)}</div>`;
                     });
                 } else {
@@ -174,21 +173,21 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <th>Значення</th>
                                 <th>Відхилення</th>
                                 <th>Відхилення (%)</th>
-                                <th>В діапазоні?</th>
+                                <th>Поріг (10%)</th>
                                 <th>Статус</th>
                             </tr>
                         </thead>
                         <tbody>`;
                 
                 data.details.forEach((detail) => {
-                    const rowClass = detail.inRange ? 'detail-removed' : 'detail-kept';
+                    const statusClass = detail.removed ? 'detail-removed' : 'detail-kept';
                     html += `<tr>
                         <td>${detail.index}</td>
-                        <td class="${rowClass}">${detail.value.toFixed(6)}</td>
-                        <td>${detail.deviation.toFixed(6)}</td>
-                        <td>${detail.deviationPercent.toFixed(2)}%</td>
-                        <td class="${rowClass}">${detail.inRange ? 'Так' : 'Ні'}</td>
-                        <td class="${rowClass}">${detail.inRange ? 'Видалено' : 'Залишено'}</td>
+                        <td>${detail.value.toFixed(6)}</td>
+                        <td>${detail.difference.toFixed(6)}</td>
+                        <td>${detail.percentDifference.toFixed(2)}%</td>
+                        <td>${detail.threshold.toFixed(1)}%</td>
+                        <td class="${statusClass}">${detail.removed ? 'Видалено' : 'Залишено'}</td>
                     </tr>`;
                 });
                 
@@ -197,8 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Легенда
                 html += `<div style="margin-top: 15px; padding: 10px; background: #1e1e1e; border-radius: 4px;">
                     <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Легенда:</div>
-                    <div style="color: #f48771; font-size: 11px;">• Червоне - елемент відрізняється від середнього не більш ніж на 10% (видалено)</div>
-                    <div style="color: #4ec9b0; font-size: 11px;">• Зелене - елемент відрізняється від середнього більш ніж на 10% (залишено)</div>
+                    <div style="color: #f48771; font-size: 11px;">• Червоне - елемент видалено (відхилення ≤ 10%)</div>
+                    <div style="color: #4ec9b0; font-size: 11px;">• Зелене - елемент залишено (відхилення > 10%)</div>
                 </div>`;
 
                 resultsContent.innerHTML = html;
@@ -216,4 +215,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-

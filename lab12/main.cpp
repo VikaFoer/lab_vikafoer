@@ -98,29 +98,37 @@ private:
     double calculateAverage(double* arr, int n) {
         if (n == 0) return 0.0;
         double sum = 0.0;
-        double* ptr = arr;
         for (int i = 0; i < n; ++i) {
-            sum += *ptr;
-            ptr++;
+            sum += *(arr + i);
         }
         return sum / n;
     }
 
     // Фільтрація масиву через покажчики
-    std::vector<double> filterArray(double* arr, int n, double average, double tolerance) {
+    // Вилучаємо елементи, що відрізняються від середнього не більш ніж на 10%
+    std::vector<double> filterArray(double* arr, int n, double average, std::vector<std::map<std::string, double>>& details) {
         std::vector<double> result;
-        double* ptr = arr;
-        
-        double lowerBound = average * (1.0 - tolerance);
-        double upperBound = average * (1.0 + tolerance);
+        const double threshold = 0.10; // 10%
         
         for (int i = 0; i < n; ++i) {
-            double value = *ptr;
-            // Залишаємо елементи, що відрізняються від середнього не більш ніж на 10%
-            if (value >= lowerBound && value <= upperBound) {
+            double value = *(arr + i);
+            double diff = std::abs(value - average);
+            double percentDiff = (average != 0) ? (diff / std::abs(average)) : 0.0;
+            bool shouldKeep = percentDiff > threshold; // Залишаємо тільки ті, що відрізняються БІЛЬШ ніж на 10%
+            
+            std::map<std::string, double> detail;
+            detail["index"] = i;
+            detail["value"] = value;
+            detail["average"] = average;
+            detail["difference"] = diff;
+            detail["percentDifference"] = percentDiff * 100.0;
+            detail["threshold"] = threshold * 100.0;
+            detail["shouldKeep"] = shouldKeep ? 1.0 : 0.0;
+            details.push_back(detail);
+            
+            if (shouldKeep) {
                 result.push_back(value);
             }
-            ptr++;
         }
         
         return result;
@@ -142,7 +150,7 @@ private:
                 return result.str();
             }
             
-            // Отримуємо масив
+            // Отримуємо послідовність
             std::vector<double> originalArray;
             for (int i = 0; i < n; ++i) {
                 std::string key = "a" + std::to_string(i + 1);
@@ -154,67 +162,48 @@ private:
                 originalArray.push_back(value);
             }
             
-            // Використовуємо покажчики для обчислення середнього
-            double average = calculateAverage(originalArray.data(), n);
-            const double TOLERANCE = 0.10; // 10%
+            // Використовуємо покажчики для доступу до елементів
+            double* arrPtr = originalArray.data();
+            double average = calculateAverage(arrPtr, n);
             
-            double lowerBound = average * (1.0 - TOLERANCE);
-            double upperBound = average * (1.0 + TOLERANCE);
-            
-            // Використовуємо покажчики для фільтрації
-            std::vector<double> filteredArray = filterArray(originalArray.data(), n, average, TOLERANCE);
-            
-            // Формуємо детальну інформацію про кожен елемент
+            // Фільтруємо масив через покажчики
             std::vector<std::map<std::string, double>> details;
-            double* ptr = originalArray.data();
-            for (int i = 0; i < n; ++i) {
-                double value = *ptr;
-                double deviation = std::abs(value - average);
-                double deviationPercent = (deviation / average) * 100.0;
-                bool inRange = (value >= lowerBound && value <= upperBound);
-                
-                std::map<std::string, double> detail;
-                detail["index"] = i;
-                detail["value"] = value;
-                detail["deviation"] = deviation;
-                detail["deviationPercent"] = deviationPercent;
-                detail["inRange"] = inRange ? 1.0 : 0.0;
-                details.push_back(detail);
-                
-                ptr++;
-            }
+            std::vector<double> resultArray = filterArray(arrPtr, n, average, details);
             
             // Формування JSON відповіді
             result << "{";
             result << "\"success\":true,";
             result << "\"n\":" << n << ",";
             result << "\"average\":" << average << ",";
-            result << "\"tolerance\":" << TOLERANCE << ",";
-            result << "\"lowerBound\":" << lowerBound << ",";
-            result << "\"upperBound\":" << upperBound << ",";
+            result << "\"thresholdPercent\":10.0,";
+            result << "\"lowerBound\":" << (average * 0.9) << ",";
+            result << "\"upperBound\":" << (average * 1.1) << ",";
             result << "\"originalArray\":[";
             for (int i = 0; i < n; ++i) {
                 if (i > 0) result << ",";
                 result << originalArray[i];
             }
             result << "],";
-            result << "\"filteredArray\":[";
-            for (size_t i = 0; i < filteredArray.size(); ++i) {
+            result << "\"resultArray\":[";
+            for (size_t i = 0; i < resultArray.size(); ++i) {
                 if (i > 0) result << ",";
-                result << filteredArray[i];
+                result << resultArray[i];
             }
             result << "],";
-            result << "\"removedCount\":" << (n - static_cast<int>(filteredArray.size())) << ",";
-            result << "\"remainingCount\":" << filteredArray.size() << ",";
+            result << "\"removedCount\":" << (n - static_cast<int>(resultArray.size())) << ",";
+            result << "\"remainingCount\":" << resultArray.size() << ",";
             result << "\"details\":[";
             for (size_t i = 0; i < details.size(); ++i) {
                 if (i > 0) result << ",";
                 result << "{";
                 result << "\"index\":" << (int)details[i]["index"] << ",";
                 result << "\"value\":" << details[i]["value"] << ",";
-                result << "\"deviation\":" << details[i]["deviation"] << ",";
-                result << "\"deviationPercent\":" << details[i]["deviationPercent"] << ",";
-                result << "\"inRange\":" << (details[i]["inRange"] == 1.0 ? "true" : "false");
+                result << "\"average\":" << details[i]["average"] << ",";
+                result << "\"difference\":" << details[i]["difference"] << ",";
+                result << "\"percentDifference\":" << details[i]["percentDifference"] << ",";
+                result << "\"threshold\":" << details[i]["threshold"] << ",";
+                result << "\"shouldKeep\":" << (details[i]["shouldKeep"] > 0.5 ? "true" : "false") << ",";
+                result << "\"removed\":" << (details[i]["shouldKeep"] < 0.5 ? "true" : "false");
                 result << "}";
             }
             result << "]";
@@ -462,4 +451,3 @@ int main() {
 
     return 0;
 }
-
