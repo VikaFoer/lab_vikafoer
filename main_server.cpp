@@ -1878,7 +1878,6 @@ private:
                                     json << originalArray[i];
                                 }
                                 json << "],";
-                                json << "\"resultArray\":[";
                                 json << "\"details\":[";
                                 
                                 for (int i = 0; i < n; ++i) {

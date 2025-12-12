@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { number: 9, title: 'Лабораторна робота 9', description: 'Пошук відрізків з довершених чисел', status: 'active' },
         { number: 10, title: 'Лабораторна робота 10', description: 'Видалення простих чисел з масиву', status: 'active' },
         { number: 11, title: 'Лабораторна робота 11', description: 'Рекурсивне обчислення НСД масиву', status: 'active' },
+        { number: 12, title: 'Лабораторна робота 12', description: 'Фільтрація послідовності за відхиленням від середнього', status: 'active' },
         { number: 12, title: 'Лабораторна робота 12', description: 'Фільтрація послідовності за відхиленням від середнього', status: 'active' }
     ];
     
