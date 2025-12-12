@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 2 - Прямокутники</title>
+    <title>Лабораторна робота 2 - Поміщення прямокутника</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
         <div class="console-header">
             <div class="console-title">
                 <span class="console-icon">▶</span>
-                <span>Лабораторна робота 2 - Перевірка поміщення прямокутників</span>
+                <span>Лабораторна робота 2 - Поміщення прямокутника всередині іншого</span>
             </div>
             <div class="console-controls">
                 <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
@@ -27,21 +27,24 @@
                     <span class="command">rectangle_fit.exe</span>
                 </div>
                 <div class="console-line">
-                    <span class="output">=== Перевірка поміщення прямокутників ===</span>
+                    <span class="output">=== Поміщення прямокутника всередині іншого ===</span>
                 </div>
                 <div class="console-line"></div>
                 <div class="console-line">
-                    <span class="output">Задача: Чи можна прямокутник зі сторонами a і b</span>
+                    <span class="output">Дано додатні дійсні числа a, b, c, d.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Чи можна прямокутник зі сторонами a і b</span>
                 </div>
                 <div class="console-line">
                     <span class="output">повністю помістити всередині прямокутника зі сторонами c, d?</span>
                 </div>
                 <div class="console-line"></div>
                 <div class="console-line">
-                    <span class="output">Обмеження: сторони можуть бути тільки паралельними</span>
+                    <span class="output">Обмеження: сторони можуть бути тільки</span>
                 </div>
                 <div class="console-line">
-                    <span class="output">або перпендикулярними (поворот на 90° дозволено)</span>
+                    <span class="output">паралельними або перпендикулярними.</span>
                 </div>
             </div>
 
@@ -49,26 +52,26 @@
                 <form id="calculationForm">
                     <div class="rectangles-section">
                         <div class="rectangle-group">
-                            <h3 class="rectangle-title">Внутрішній прямокутник</h3>
+                            <h3 class="rectangle-title">Перший прямокутник (внутрішній)</h3>
                             <div class="form-group">
                                 <label for="a">Сторона a:</label>
-                                <input type="number" id="a" name="a" step="0.001" min="0.001" max="1000000" required>
+                                <input type="number" id="a" name="a" step="0.0001" min="0.0001" max="1000000" required>
                             </div>
                             <div class="form-group">
                                 <label for="b">Сторона b:</label>
-                                <input type="number" id="b" name="b" step="0.001" min="0.001" max="1000000" required>
+                                <input type="number" id="b" name="b" step="0.0001" min="0.0001" max="1000000" required>
                             </div>
                         </div>
 
                         <div class="rectangle-group">
-                            <h3 class="rectangle-title">Зовнішній прямокутник</h3>
+                            <h3 class="rectangle-title">Другий прямокутник (зовнішній)</h3>
                             <div class="form-group">
                                 <label for="c">Сторона c:</label>
-                                <input type="number" id="c" name="c" step="0.001" min="0.001" max="1000000" required>
+                                <input type="number" id="c" name="c" step="0.0001" min="0.0001" max="1000000" required>
                             </div>
                             <div class="form-group">
                                 <label for="d">Сторона d:</label>
-                                <input type="number" id="d" name="d" step="0.001" min="0.001" max="1000000" required>
+                                <input type="number" id="d" name="d" step="0.0001" min="0.0001" max="1000000" required>
                             </div>
                         </div>
                     </div>

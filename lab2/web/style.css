@@ -289,11 +289,11 @@ body {
     font-weight: bold;
 }
 
-.result-value.success {
+.result-value.yes {
     color: #4ec9b0;
 }
 
-.result-value.error {
+.result-value.no {
     color: #f48771;
 }
 
@@ -318,28 +318,32 @@ body {
     margin-bottom: 10px;
 }
 
-.rectangle-info .result-item {
-    background: #252526;
-}
-
-.fit-status {
-    padding: 15px;
-    border-radius: 4px;
+.variant-info {
     margin-top: 15px;
-    font-weight: bold;
-    text-align: center;
-    font-size: 16px;
+    padding: 15px;
+    background: #1e1e1e;
+    border-radius: 4px;
+    border-left: 3px solid #dcdcaa;
 }
 
-.fit-status.yes {
-    background: #1e3d1e;
-    border: 2px solid #4ec9b0;
+.variant-info h4 {
+    color: #dcdcaa;
+    margin-bottom: 10px;
+}
+
+.variant-info.possible {
+    border-left-color: #4ec9b0;
+}
+
+.variant-info.possible h4 {
     color: #4ec9b0;
 }
 
-.fit-status.no {
-    background: #3d1e1e;
-    border: 2px solid #f48771;
+.variant-info.impossible {
+    border-left-color: #f48771;
+}
+
+.variant-info.impossible h4 {
     color: #f48771;
 }
 

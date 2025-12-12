@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const d = parseFloat(document.getElementById('d').value);
 
         // Додаємо запит у консоль
-        addConsoleLine(`Внутрішній прямокутник: a = ${a}, b = ${b}`, 'output');
-        addConsoleLine(`Зовнішній прямокутник: c = ${c}, d = ${d}`, 'output');
+        addConsoleLine(`Перший прямокутник: a = ${a}, b = ${b}`, 'output');
+        addConsoleLine(`Другий прямокутник: c = ${c}, d = ${d}`, 'output');
         addConsoleLine('Виконую перевірку...', 'output');
 
         // Формуємо параметри для запиту
@@ -76,70 +76,89 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Формуємо HTML для результатів
                 let html = '';
 
-                // Статус поміщення
-                const statusClass = data.canFit ? 'yes' : 'no';
-                const statusText = data.canFit ? '✓ ПРЯМОКУТНИК ПОМІЩАЄТЬСЯ' : '✗ ПРЯМОКУТНИК НЕ ПОМІЩАЄТЬСЯ';
-                html += `<div class="fit-status ${statusClass}">${statusText}</div>`;
-
-                // Детальна інформація
+                // Головний результат
                 html += `<div class="result-item">
-                    <div class="result-label">Рекомендація:</div>
-                    <div class="result-value">${data.recommendation}</div>
+                    <div class="result-label">Результат перевірки:</div>
+                    <div class="result-value ${data.canFit ? 'yes' : 'no'}">
+                        ${data.canFit ? '✓ МОЖНА помістити' : '✗ НЕ МОЖНА помістити'}
+                    </div>
                 </div>`;
 
+                // Інформація про прямокутники
                 html += `<div class="rectangle-info">
-                    <h4>Внутрішній прямокутник:</h4>
+                    <h4>Перший прямокутник (внутрішній):</h4>
                     <div class="result-item">
                         <div class="result-label">Сторона a:</div>
-                        <div class="result-value">${data.innerRectangle.sideA.toFixed(4)}</div>
+                        <div class="result-value">${data.rectangle1.side1.toFixed(4)}</div>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Сторона b:</div>
-                        <div class="result-value">${data.innerRectangle.sideB.toFixed(4)}</div>
+                        <div class="result-value">${data.rectangle1.side2.toFixed(4)}</div>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Площа:</div>
-                        <div class="result-value">${data.innerRectangle.area.toFixed(4)}</div>
+                        <div class="result-value">${data.rectangle1.area.toFixed(4)}</div>
                     </div>
                 </div>`;
 
                 html += `<div class="rectangle-info">
-                    <h4>Зовнішній прямокутник:</h4>
+                    <h4>Другий прямокутник (зовнішній):</h4>
                     <div class="result-item">
                         <div class="result-label">Сторона c:</div>
-                        <div class="result-value">${data.outerRectangle.sideC.toFixed(4)}</div>
+                        <div class="result-value">${data.rectangle2.side1.toFixed(4)}</div>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Сторона d:</div>
-                        <div class="result-value">${data.outerRectangle.sideD.toFixed(4)}</div>
+                        <div class="result-value">${data.rectangle2.side2.toFixed(4)}</div>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Площа:</div>
-                        <div class="result-value">${data.outerRectangle.area.toFixed(4)}</div>
+                        <div class="result-value">${data.rectangle2.area.toFixed(4)}</div>
                     </div>
                 </div>`;
 
-                html += `<div class="result-item">
-                    <div class="result-label">Варіанти поміщення:</div>
-                    <div class="result-value">
-                        Без повороту: ${data.fitsWithoutRotation ? '✓ Так' : '✗ Ні'}<br>
-                        З поворотом на 90°: ${data.fitsWithRotation ? '✓ Так' : '✗ Ні'}
+                // Варіанти розміщення
+                html += `<div class="variant-info ${data.variants.variant1.possible ? 'possible' : 'impossible'}">
+                    <h4>Варіант 1: ${data.variants.variant1.description}</h4>
+                    <div class="result-item">
+                        <div class="result-label">Умова:</div>
+                        <div class="result-value">${data.variants.variant1.condition}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Перевірка:</div>
+                        <div class="result-value">${data.variants.variant1.check}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Результат:</div>
+                        <div class="result-value ${data.variants.variant1.possible ? 'yes' : 'no'}">
+                            ${data.variants.variant1.possible ? '✓ Можливо' : '✗ Неможливо'}
+                        </div>
                     </div>
                 </div>`;
 
-                html += `<div class="result-item">
-                    <div class="result-label">Відношення площ:</div>
-                    <div class="result-value">${data.areaRatio.toFixed(2)}%</div>
+                html += `<div class="variant-info ${data.variants.variant2.possible ? 'possible' : 'impossible'}">
+                    <h4>Варіант 2: ${data.variants.variant2.description}</h4>
+                    <div class="result-item">
+                        <div class="result-label">Умова:</div>
+                        <div class="result-value">${data.variants.variant2.condition}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Перевірка:</div>
+                        <div class="result-value">${data.variants.variant2.check}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Результат:</div>
+                        <div class="result-value ${data.variants.variant2.possible ? 'yes' : 'no'}">
+                            ${data.variants.variant2.possible ? '✓ Можливо' : '✗ Неможливо'}
+                        </div>
+                    </div>
                 </div>`;
 
                 resultsContent.innerHTML = html;
                 resultsContainer.style.display = 'block';
 
-                if (data.canFit) {
-                    addConsoleLine(`Результат: ${data.recommendation}`, 'output success');
-                } else {
-                    addConsoleLine('Результат: Прямокутник не поміщається', 'output error');
-                }
+                addConsoleLine(`Результат: ${data.canFit ? 'МОЖНА помістити' : 'НЕ МОЖНА помістити'}`, 
+                    data.canFit ? 'output success' : 'output error');
             }
 
         } catch (error) {

@@ -4,8 +4,8 @@
 #include <thread>
 #include <fstream>
 #include <iomanip>
-#include <algorithm>
 #include <map>
+#include <algorithm>
 #include <cmath>
 
 #ifdef _WIN32
@@ -20,8 +20,8 @@
 #endif
 
 // Константи для обмежень
-const double MIN_SIZE = 0.001;
-const double MAX_SIZE = 1000000.0;
+const double MIN_VALUE = 0.0001;
+const double MAX_VALUE = 1000000.0;
 
 class RectangleFitServer {
 private:
@@ -108,59 +108,57 @@ private:
             double d = std::stod(params.at("d"));
 
             // Перевірка діапазонів
-            if (a < MIN_SIZE || a > MAX_SIZE ||
-                b < MIN_SIZE || b > MAX_SIZE ||
-                c < MIN_SIZE || c > MAX_SIZE ||
-                d < MIN_SIZE || d > MAX_SIZE) {
+            if (a < MIN_VALUE || a > MAX_VALUE ||
+                b < MIN_VALUE || b > MAX_VALUE ||
+                c < MIN_VALUE || c > MAX_VALUE ||
+                d < MIN_VALUE || d > MAX_VALUE) {
                 result << "{\"error\":\"Значення поза допустимим діапазоном [" 
-                       << MIN_SIZE << "; " << MAX_SIZE << "]\"}";
+                       << MIN_VALUE << "; " << MAX_VALUE << "]\"}";
                 return result.str();
             }
 
-            // Перевірка чи можна помістити прямокутник
-            // Варіант 1: Без повороту (a паралельно c, b паралельно d)
-            bool fitsWithoutRotation = (a <= c && b <= d);
+            // Перевірка чи всі числа додатні
+            if (a <= 0 || b <= 0 || c <= 0 || d <= 0) {
+                result << "{\"error\":\"Всі значення повинні бути додатніми\"}";
+                return result.str();
+            }
+
+            // Розрахунок: чи можна помістити прямокутник a×b всередині прямокутника c×d
+            // Варіант 1: a паралельно c, b паралельно d
+            bool fit1 = (a <= c && b <= d);
+            // Варіант 2: a паралельно d, b паралельно c
+            bool fit2 = (a <= d && b <= c);
             
-            // Варіант 2: З поворотом на 90° (a паралельно d, b паралельно c)
-            bool fitsWithRotation = (a <= d && b <= c);
+            bool canFit = fit1 || fit2;
             
-            bool canFit = fitsWithoutRotation || fitsWithRotation;
-            
-            // Обчислюємо площі для додаткової інформації
-            double innerArea = a * b;
-            double outerArea = c * d;
-            double areaRatio = (innerArea / outerArea) * 100.0;
-            
-            // Формуємо JSON відповідь
+            // Формування JSON відповіді
             result << "{";
             result << "\"success\":true,";
             result << "\"canFit\":" << (canFit ? "true" : "false") << ",";
-            result << "\"fitsWithoutRotation\":" << (fitsWithoutRotation ? "true" : "false") << ",";
-            result << "\"fitsWithRotation\":" << (fitsWithRotation ? "true" : "false") << ",";
-            result << "\"innerRectangle\":{";
-            result << "\"sideA\":" << a << ",";
-            result << "\"sideB\":" << b << ",";
-            result << "\"area\":" << innerArea;
+            result << "\"rectangle1\":{";
+            result << "\"side1\":" << a << ",";
+            result << "\"side2\":" << b << ",";
+            result << "\"area\":" << (a * b);
             result << "},";
-            result << "\"outerRectangle\":{";
-            result << "\"sideC\":" << c << ",";
-            result << "\"sideD\":" << d << ",";
-            result << "\"area\":" << outerArea;
+            result << "\"rectangle2\":{";
+            result << "\"side1\":" << c << ",";
+            result << "\"side2\":" << d << ",";
+            result << "\"area\":" << (c * d);
             result << "},";
-            result << "\"areaRatio\":" << areaRatio << ",";
-            result << "\"recommendation\":\"";
-            if (canFit) {
-                if (fitsWithoutRotation && fitsWithRotation) {
-                    result << "Прямокутник поміщається в обох орієнтаціях";
-                } else if (fitsWithoutRotation) {
-                    result << "Прямокутник поміщається без повороту";
-                } else {
-                    result << "Прямокутник поміщається з поворотом на 90°";
-                }
-            } else {
-                result << "Прямокутник не поміщається";
-            }
-            result << "\"";
+            result << "\"variants\":{";
+            result << "\"variant1\":{";
+            result << "\"description\":\"a паралельно c, b паралельно d\",";
+            result << "\"possible\":" << (fit1 ? "true" : "false") << ",";
+            result << "\"condition\":\"a <= c && b <= d\",";
+            result << "\"check\":\"" << a << " <= " << c << " && " << b << " <= " << d << "\"";
+            result << "},";
+            result << "\"variant2\":{";
+            result << "\"description\":\"a паралельно d, b паралельно c\",";
+            result << "\"possible\":" << (fit2 ? "true" : "false") << ",";
+            result << "\"condition\":\"a <= d && b <= c\",";
+            result << "\"check\":\"" << a << " <= " << d << " && " << b << " <= " << c << "\"";
+            result << "}";
+            result << "}";
             result << "}";
 
         } catch (const std::exception& e) {
@@ -335,7 +333,7 @@ public:
         running = true;
         std::cout << "════════════════════════════════════════" << std::endl;
         std::cout << "  Лабораторна робота 2" << std::endl;
-        std::cout << "  Перевірка поміщення прямокутників" << std::endl;
+        std::cout << "  Поміщення прямокутника всередині іншого" << std::endl;
         std::cout << "  Сервер запущено на http://localhost:" << port << std::endl;
         std::cout << "════════════════════════════════════════" << std::endl;
 
@@ -388,7 +386,7 @@ public:
 
 int main() {
     std::cout << "=== Лабораторна робота 2 ===" << std::endl;
-    std::cout << "Перевірка поміщення прямокутників" << std::endl;
+    std::cout << "Поміщення прямокутника всередині іншого" << std::endl;
     std::cout << "Відкрийте браузер і перейдіть на http://localhost:8080" << std::endl;
 
     RectangleFitServer server(8080);
