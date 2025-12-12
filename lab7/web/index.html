@@ -3,29 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 7</title>
+    <title>Лабораторна робота 7 - Заміна елементів масиву</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Лабораторна робота 7</h1>
-            <p>Веб-інтерфейс з C++ бекендом</p>
-        </header>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 7 - Заміна елементів масиву на середнє арифметичне</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab7></span>
+                    <span class="command">array_average.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Заміна елементів масиву на середнє арифметичне ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Дано натуральне число n і масив з n дійсних чисел.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Кожен елемент замінити середнім арифметичним</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">усіх передуючих йому елементів, включаючи його самого.</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Приклад: [1, 2, 3, 4] → [1, 1.5, 2, 2.5]</span>
+                </div>
+            </div>
 
-        <main>
-            <section class="card">
-                <h2>Лабораторна робота 7</h2>
-                <p>Тут буде реалізовано функціональність для лабораторної роботи 7.</p>
-            </section>
-        </main>
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Введення масиву</h3>
+                        <div class="form-group">
+                            <label for="n">Розмір масиву n:</label>
+                            <input type="number" id="n" name="n" min="1" max="100" step="1" required 
+                                   placeholder="Наприклад: 5">
+                            <small class="form-hint">Діапазон: від 1 до 100</small>
+                        </div>
+                        <button type="button" id="generateArrayBtn" class="btn-generate">Створити поля для масиву</button>
+                        <div id="arrayInputs" class="array-inputs"></div>
+                        <button type="submit" class="btn-calculate" style="display: none;">Обчислити</button>
+                    </div>
+                </form>
 
-        <footer>
-            <p>Лабораторні роботи з C++ та веб-інтерфейсом</p>
-        </footer>
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-

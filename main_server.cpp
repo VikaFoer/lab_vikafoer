@@ -819,6 +819,128 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab7
+                    if (labNum == "lab7" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab7 (заміна елементів масиву)
+                        if (params.find("n") != params.end()) {
+                            try {
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_N = 1;
+                                const int MAX_N = 100;
+                                
+                                if (n < MIN_N || n > MAX_N) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 100]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо масив
+                                std::vector<double> originalArray;
+                                for (int i = 0; i < n; ++i) {
+                                    std::string key = "arr" + std::to_string(i);
+                                    if (params.find(key) == params.end()) {
+                                        sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів масиву\"}", "application/json");
+                                        return;
+                                    }
+                                    double value = std::stod(params.at(key));
+                                    originalArray.push_back(value);
+                                }
+                                
+                                // Створюємо новий масив з середніми арифметичними
+                                std::vector<double> resultArray;
+                                double runningSum = 0.0;
+                                
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(6);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"n\":" << n << ",";
+                                json << "\"originalArray\":[";
+                                for (size_t i = 0; i < originalArray.size(); ++i) {
+                                    if (i > 0) json << ",";
+                                    json << originalArray[i];
+                                }
+                                json << "],";
+                                json << "\"resultArray\":[";
+                                json << "\"steps\":[";
+                                
+                                bool firstStep = true;
+                                for (int i = 0; i < n; ++i) {
+                                    runningSum += originalArray[i];
+                                    double average = runningSum / (i + 1);
+                                    resultArray.push_back(average);
+                                    
+                                    if (!firstStep) json << ",";
+                                    firstStep = false;
+                                    
+                                    json << "{";
+                                    json << "\"index\":" << (i + 1) << ",";
+                                    json << "\"originalValue\":" << originalArray[i] << ",";
+                                    json << "\"runningSum\":" << runningSum << ",";
+                                    json << "\"count\":" << (i + 1) << ",";
+                                    json << "\"average\":" << average;
+                                    json << "}";
+                                }
+                                
+                                json << "],";
+                                json << "\"resultArray\":[";
+                                for (size_t i = 0; i < resultArray.size(); ++i) {
+                                    if (i > 0) json << ",";
+                                    json << resultArray[i];
+                                }
+                                json << "]";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";

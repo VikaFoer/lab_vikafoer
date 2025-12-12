@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { number: 4, title: 'Лабораторна робота 4', description: 'Реверсування порядку цифр числа', status: 'active' },
         { number: 5, title: 'Лабораторна робота 5', description: 'Обчислення тригонометричної суми', status: 'active' },
         { number: 6, title: 'Лабораторна робота 6', description: 'Обчислення суми з факторіалами', status: 'active' },
-        { number: 7, title: 'Лабораторна робота 7', description: 'В розробці', status: 'pending' },
+        { number: 7, title: 'Лабораторна робота 7', description: 'Заміна елементів масиву на середнє арифметичне', status: 'active' },
         { number: 8, title: 'Лабораторна робота 8', description: 'В розробці', status: 'pending' },
         { number: 9, title: 'Лабораторна робота 9', description: 'В розробці', status: 'pending' },
         { number: 10, title: 'Лабораторна робота 10', description: 'В розробці', status: 'pending' },
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             card.dataset.labNumber = lab.number;
             
             card.innerHTML = `
-                <div class="lab-number">Lab ${lab.number}</div>
+                <div class="lab-number">Task ${lab.number}</div>
                 <div class="lab-title">${lab.title}</div>
                 <div class="lab-status ${lab.status}">${lab.status === 'active' ? 'Готово' : 'В розробці'}</div>
                 <div class="lab-description">${lab.description}</div>
