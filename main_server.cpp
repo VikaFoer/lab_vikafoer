@@ -286,14 +286,19 @@ private:
                                 double c = std::stod(params.at("c"));
                                 double d = std::stod(params.at("d"));
                                 
-                                const double MIN_SIZE = 0.001;
-                                const double MAX_SIZE = 1000000.0;
+                                const double MIN_VALUE = 0.0001;
+                                const double MAX_VALUE = 1000000.0;
                                 
-                                if (a < MIN_SIZE || a > MAX_SIZE ||
-                                    b < MIN_SIZE || b > MAX_SIZE ||
-                                    c < MIN_SIZE || c > MAX_SIZE ||
-                                    d < MIN_SIZE || d > MAX_SIZE) {
-                                    sendResponse(clientSocket, "{\"error\":\"Значення поза допустимим діапазоном\"}", "application/json");
+                                if (a < MIN_VALUE || a > MAX_VALUE ||
+                                    b < MIN_VALUE || b > MAX_VALUE ||
+                                    c < MIN_VALUE || c > MAX_VALUE ||
+                                    d < MIN_VALUE || d > MAX_VALUE) {
+                                    sendResponse(clientSocket, "{\"error\":\"Значення поза допустимим діапазоном [" + std::to_string(MIN_VALUE) + "; " + std::to_string(MAX_VALUE) + "]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                if (a <= 0 || b <= 0 || c <= 0 || d <= 0) {
+                                    sendResponse(clientSocket, "{\"error\":\"Всі значення повинні бути додатніми\"}", "application/json");
                                     return;
                                 }
                                 
