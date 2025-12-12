@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { number: 3, title: 'Лабораторна робота 3', description: 'Перевірка належності точки трикутнику', status: 'active' },
         { number: 4, title: 'Лабораторна робота 4', description: 'Реверсування порядку цифр числа', status: 'active' },
         { number: 5, title: 'Лабораторна робота 5', description: 'Обчислення тригонометричної суми', status: 'active' },
-        { number: 6, title: 'Лабораторна робота 6', description: 'В розробці', status: 'pending' },
+        { number: 6, title: 'Лабораторна робота 6', description: 'Обчислення суми з факторіалами', status: 'active' },
         { number: 7, title: 'Лабораторна робота 7', description: 'В розробці', status: 'pending' },
         { number: 8, title: 'Лабораторна робота 8', description: 'В розробці', status: 'pending' },
         { number: 9, title: 'Лабораторна робота 9', description: 'В розробці', status: 'pending' },

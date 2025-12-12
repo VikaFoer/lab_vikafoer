@@ -698,6 +698,127 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab6
+                    if (labNum == "lab6" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab6 (сума з факторіалами)
+                        if (params.find("x") != params.end() && params.find("n") != params.end()) {
+                            try {
+                                double x = std::stod(params.at("x"));
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_N = 1;
+                                const int MAX_N = 20;
+                                
+                                if (n < MIN_N || n > MAX_N) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 20]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Функція для обчислення факторіалу
+                                auto factorial = [](int num) -> double {
+                                    if (num < 0) return 0;
+                                    if (num == 0 || num == 1) return 1.0;
+                                    double result = 1.0;
+                                    for (int i = 2; i <= num; ++i) {
+                                        result *= i;
+                                    }
+                                    return result;
+                                };
+                                
+                                double absX = std::abs(x);
+                                double totalSum = 0.0;
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(10);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"x\":" << x << ",";
+                                json << "\"absX\":" << absX << ",";
+                                json << "\"n\":" << n << ",";
+                                json << "\"terms\":[";
+                                
+                                bool firstTerm = true;
+                                for (int i = 1; i <= n; ++i) {
+                                    double fact2i = factorial(2 * i);
+                                    double factI2 = factorial(i * i);
+                                    
+                                    if (factI2 == 0) {
+                                        sendResponse(clientSocket, "{\"error\":\"Ділення на нуль при i=" + std::to_string(i) + "\"}", "application/json");
+                                        return;
+                                    }
+                                    
+                                    double numerator = fact2i + absX;
+                                    double denominator = factI2;
+                                    double term = numerator / denominator;
+                                    totalSum += term;
+                                    
+                                    if (!firstTerm) json << ",";
+                                    firstTerm = false;
+                                    
+                                    json << "{";
+                                    json << "\"i\":" << i << ",";
+                                    json << "\"fact2i\":" << fact2i << ",";
+                                    json << "\"factI2\":" << factI2 << ",";
+                                    json << "\"numerator\":" << numerator << ",";
+                                    json << "\"denominator\":" << denominator << ",";
+                                    json << "\"term\":" << term << ",";
+                                    json << "\"partialSum\":" << totalSum;
+                                    json << "}";
+                                }
+                                
+                                json << "],";
+                                json << "\"totalSum\":" << totalSum;
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";

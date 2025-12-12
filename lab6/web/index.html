@@ -3,29 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 6</title>
+    <title>Лабораторна робота 6 - Сума з факторіалами</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Лабораторна робота 6</h1>
-            <p>Веб-інтерфейс з C++ бекендом</p>
-        </header>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 6 - Обчислення суми з факторіалами</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab6></span>
+                    <span class="command">factorial_sum.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Обчислення суми з факторіалами ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Дано дійсне число x і натуральне число n.</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Обчислити суму:</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Σ(i=1 to n) [(2i)! + |x|] / [(i²)!]</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Приклад для n=3, x=5:</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">(2!+5)/(1!) + (4!+5)/(4!) + (6!+5)/(9!)</span>
+                </div>
+            </div>
 
-        <main>
-            <section class="card">
-                <h2>Лабораторна робота 6</h2>
-                <p>Тут буде реалізовано функціональність для лабораторної роботи 6.</p>
-            </section>
-        </main>
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Введення параметрів</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="x">Дійсне число x:</label>
+                                <input type="number" id="x" name="x" step="0.01" required 
+                                       placeholder="Наприклад: 5.0 або -3.14">
+                            </div>
+                            <div class="form-group">
+                                <label for="n">Натуральне число n:</label>
+                                <input type="number" id="n" name="n" min="1" max="20" step="1" required 
+                                       placeholder="Наприклад: 5">
+                                <small class="form-hint">Діапазон: від 1 до 20</small>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-calculate">Обчислити</button>
+                    </div>
+                </form>
 
-        <footer>
-            <p>Лабораторні роботи з C++ та веб-інтерфейсом</p>
-        </footer>
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
