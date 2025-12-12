@@ -579,6 +579,125 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab5
+                    if (labNum == "lab5" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab5 (тригонометрична сума)
+                        if (params.find("n") != params.end()) {
+                            try {
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_VALUE = 1;
+                                const int MAX_VALUE = 1000;
+                                
+                                if (n < MIN_VALUE || n > MAX_VALUE) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 1000]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Функції для обчислення сум
+                                auto sumCos = [](int k) -> double {
+                                    double sum = 0.0;
+                                    for (int j = 2; j <= k + 1; ++j) {
+                                        sum += std::cos(j);
+                                    }
+                                    return sum;
+                                };
+                                
+                                auto sumSin = [](int k) -> double {
+                                    double sum = 0.0;
+                                    for (int j = 1; j <= k; ++j) {
+                                        sum += std::sin(j);
+                                    }
+                                    return sum;
+                                };
+                                
+                                double totalSum = 0.0;
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(10);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"n\":" << n << ",";
+                                json << "\"terms\":[";
+                                
+                                bool firstTerm = true;
+                                for (int k = 1; k <= n; ++k) {
+                                    double cosSum = sumCos(k);
+                                    double sinSum = sumSin(k);
+                                    
+                                    if (std::abs(sinSum) < 1e-10) {
+                                        sendResponse(clientSocket, "{\"error\":\"Ділення на нуль при k=" + std::to_string(k) + "\"}", "application/json");
+                                        return;
+                                    }
+                                    
+                                    double term = cosSum / sinSum;
+                                    totalSum += term;
+                                    
+                                    if (!firstTerm) json << ",";
+                                    firstTerm = false;
+                                    
+                                    json << "{";
+                                    json << "\"k\":" << k << ",";
+                                    json << "\"cosSum\":" << cosSum << ",";
+                                    json << "\"sinSum\":" << sinSum << ",";
+                                    json << "\"term\":" << term << ",";
+                                    json << "\"partialSum\":" << totalSum;
+                                    json << "}";
+                                }
+                                
+                                json << "],";
+                                json << "\"totalSum\":" << totalSum;
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
