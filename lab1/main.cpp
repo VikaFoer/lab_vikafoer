@@ -220,13 +220,14 @@ private:
                 std::string query = path.substr(queryPos + 1);
                 std::map<std::string, std::string> params = parseQueryString(query);
                 
-                if (params.size() == 5) {
+                if (params.size() >= 5) {
                     std::string result = calculateCarMeeting(params);
                     sendResponse(clientSocket, result, "application/json");
                     return;
                 }
             }
-            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+            std::string errorJson = "{\"error\":\"Недостатньо параметрів\"}";
+            sendResponse(clientSocket, errorJson, "application/json");
             return;
         }
 

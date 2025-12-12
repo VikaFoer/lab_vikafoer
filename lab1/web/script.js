@@ -57,7 +57,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            const data = await response.json();
+            // Перевірка чи відповідь успішна
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Отримуємо текст перед парсингом JSON
+            const text = await response.text();
+            console.log('Response text:', text); // Для діагностики
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Response text:', text);
+                throw new Error('Помилка парсингу JSON: ' + e.message);
+            }
 
             if (data.error) {
                 addConsoleLine(`Помилка: ${data.error}`, 'output error');
