@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { number: 7, title: 'Лабораторна робота 7', description: 'Заміна елементів масиву на середнє арифметичне', status: 'active' },
         { number: 8, title: 'Лабораторна робота 8', description: 'Перетворення матриці', status: 'active' },
         { number: 9, title: 'Лабораторна робота 9', description: 'Пошук відрізків з довершених чисел', status: 'active' },
-        { number: 10, title: 'Лабораторна робота 10', description: 'В розробці', status: 'pending' },
+        { number: 10, title: 'Лабораторна робота 10', description: 'Видалення простих чисел з масиву', status: 'active' },
         { number: 11, title: 'Лабораторна робота 11', description: 'В розробці', status: 'pending' }
     ];
     

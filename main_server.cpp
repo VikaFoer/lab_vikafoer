@@ -1288,6 +1288,174 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab10
+                    if (labNum == "lab10" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab10 (видалення простих чисел)
+                        if (params.find("n") != params.end()) {
+                            try {
+                                int n = std::stoi(params.at("n"));
+                                
+                                const int MIN_N = 1;
+                                const int MAX_N = 100;
+                                
+                                if (n < MIN_N || n > MAX_N) {
+                                    sendResponse(clientSocket, "{\"error\":\"n має бути в діапазоні [1; 100]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо масив
+                                std::vector<int> originalArray;
+                                for (int i = 0; i < n; ++i) {
+                                    std::string key = "arr" + std::to_string(i);
+                                    if (params.find(key) == params.end()) {
+                                        sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів масиву\"}", "application/json");
+                                        return;
+                                    }
+                                    int value = std::stoi(params.at(key));
+                                    if (value < 1) {
+                                        sendResponse(clientSocket, "{\"error\":\"Всі числа мають бути натуральними (>= 1)\"}", "application/json");
+                                        return;
+                                    }
+                                    originalArray.push_back(value);
+                                }
+                                
+                                // Функція для перевірки простих чисел
+                                auto isPrime = [](int num) -> bool {
+                                    if (num < 2) return false;
+                                    if (num == 2) return true;
+                                    if (num % 2 == 0) return false;
+                                    int sqrtNum = static_cast<int>(std::sqrt(num)) + 1;
+                                    for (int i = 3; i < sqrtNum; i += 2) {
+                                        if (num % i == 0) {
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                };
+                                
+                                // Функція для отримання дільників
+                                auto getDivisors = [](int num) -> std::vector<int> {
+                                    std::vector<int> divisors;
+                                    if (num < 1) return divisors;
+                                    for (int i = 1; i <= num; ++i) {
+                                        if (num % i == 0) {
+                                            divisors.push_back(i);
+                                        }
+                                    }
+                                    return divisors;
+                                };
+                                
+                                // Перевіряємо кожен елемент
+                                std::vector<bool> isPrimeFlags(n);
+                                for (int i = 0; i < n; ++i) {
+                                    isPrimeFlags[i] = isPrime(originalArray[i]);
+                                }
+                                
+                                // Видаляємо прості числа
+                                std::vector<int> resultArray;
+                                for (int num : originalArray) {
+                                    if (!isPrime(num)) {
+                                        resultArray.push_back(num);
+                                    }
+                                }
+                                
+                                std::ostringstream json;
+                                json << std::fixed;
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"n\":" << n << ",";
+                                json << "\"originalArray\":[";
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << originalArray[i];
+                                }
+                                json << "],";
+                                json << "\"isPrimeFlags\":[";
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << (isPrimeFlags[i] ? "true" : "false");
+                                }
+                                json << "],";
+                                json << "\"resultArray\":[";
+                                for (size_t i = 0; i < resultArray.size(); ++i) {
+                                    if (i > 0) json << ",";
+                                    json << resultArray[i];
+                                }
+                                json << "],";
+                                json << "\"removedCount\":" << (n - static_cast<int>(resultArray.size())) << ",";
+                                json << "\"remainingCount\":" << resultArray.size() << ",";
+                                json << "\"details\":[";
+                                
+                                for (int i = 0; i < n; ++i) {
+                                    if (i > 0) json << ",";
+                                    auto divisors = getDivisors(originalArray[i]);
+                                    json << "{";
+                                    json << "\"index\":" << i << ",";
+                                    json << "\"value\":" << originalArray[i] << ",";
+                                    json << "\"isPrime\":" << (isPrimeFlags[i] ? "true" : "false") << ",";
+                                    json << "\"divisors\":[";
+                                    for (size_t j = 0; j < divisors.size(); ++j) {
+                                        if (j > 0) json << ",";
+                                        json << divisors[j];
+                                    }
+                                    json << "],";
+                                    json << "\"removed\":" << (isPrimeFlags[i] ? "true" : "false");
+                                    json << "}";
+                                }
+                                
+                                json << "]";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
