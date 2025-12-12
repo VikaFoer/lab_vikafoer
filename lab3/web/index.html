@@ -3,29 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 3</title>
+    <title>Лабораторна робота 3 - Точка в трикутнику</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Лабораторна робота 3</h1>
-            <p>Веб-інтерфейс з C++ бекендом</p>
-        </header>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 3 - Перевірка належності точки трикутнику</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab3></span>
+                    <span class="command">point_in_triangle.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Перевірка належності точки трикутнику ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Вершини трикутника:</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">A: (0, 1)</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">B: (1, -2)</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">C: (-1, -1)</span>
+                </div>
+            </div>
 
-        <main>
-            <section class="card">
-                <h2>Лабораторна робота 3</h2>
-                <p>Тут буде реалізовано функціональність для лабораторної роботи 3.</p>
-            </section>
-        </main>
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Координати точки</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="x">Координата X:</label>
+                                <input type="number" id="x" name="x" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="y">Координата Y:</label>
+                                <input type="number" id="y" name="y" step="0.01" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-calculate">Перевірити</button>
+                    </div>
+                </form>
 
-        <footer>
-            <p>Лабораторні роботи з C++ та веб-інтерфейсом</p>
-        </footer>
+                <div class="visualization-section">
+                    <h3 class="section-title">Візуалізація</h3>
+                    <canvas id="coordinateCanvas" width="600" height="500"></canvas>
+                </div>
+
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-

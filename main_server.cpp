@@ -355,6 +355,114 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab3
+                    if (labNum == "lab3" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо перевірку для lab3 (точка в трикутнику)
+                        if (params.size() >= 2) {
+                            try {
+                                double x = std::stod(params.at("x"));
+                                double y = std::stod(params.at("y"));
+                                
+                                // Вершини трикутника
+                                const double TRIANGLE_AX = 0.0;
+                                const double TRIANGLE_AY = 1.0;
+                                const double TRIANGLE_BX = 1.0;
+                                const double TRIANGLE_BY = -2.0;
+                                const double TRIANGLE_CX = -1.0;
+                                const double TRIANGLE_CY = -1.0;
+                                
+                                // Функція обчислення площі трикутника
+                                auto triangleArea = [](double x1, double y1, double x2, double y2, double x3, double y3) {
+                                    return std::abs((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1)) / 2.0;
+                                };
+                                
+                                // Обчислюємо площі трикутників
+                                double areaABC = triangleArea(TRIANGLE_AX, TRIANGLE_AY, TRIANGLE_BX, TRIANGLE_BY, TRIANGLE_CX, TRIANGLE_CY);
+                                double areaPBC = triangleArea(x, y, TRIANGLE_BX, TRIANGLE_BY, TRIANGLE_CX, TRIANGLE_CY);
+                                double areaAPC = triangleArea(TRIANGLE_AX, TRIANGLE_AY, x, y, TRIANGLE_CX, TRIANGLE_CY);
+                                double areaABP = triangleArea(TRIANGLE_AX, TRIANGLE_AY, TRIANGLE_BX, TRIANGLE_BY, x, y);
+                                
+                                // Перевірка належності
+                                const double EPSILON = 1e-9;
+                                double totalArea = areaPBC + areaAPC + areaABP;
+                                bool belongs = std::abs(totalArea - areaABC) < EPSILON;
+                                
+                                // Формуємо JSON відповідь
+                                std::ostringstream json;
+                                json << std::fixed << std::setprecision(6);
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"belongs\":" << (belongs ? "true" : "false") << ",";
+                                json << "\"point\":{";
+                                json << "\"x\":" << x << ",";
+                                json << "\"y\":" << y;
+                                json << "},";
+                                json << "\"triangle\":{";
+                                json << "\"vertexA\":{\"x\":" << TRIANGLE_AX << ",\"y\":" << TRIANGLE_AY << "},";
+                                json << "\"vertexB\":{\"x\":" << TRIANGLE_BX << ",\"y\":" << TRIANGLE_BY << "},";
+                                json << "\"vertexC\":{\"x\":" << TRIANGLE_CX << ",\"y\":" << TRIANGLE_CY << "},";
+                                json << "\"area\":" << areaABC;
+                                json << "},";
+                                json << "\"calculation\":{";
+                                json << "\"areaPBC\":" << areaPBC << ",";
+                                json << "\"areaAPC\":" << areaAPC << ",";
+                                json << "\"areaABP\":" << areaABP << ",";
+                                json << "\"totalArea\":" << totalArea << ",";
+                                json << "\"areaABC\":" << areaABC << ",";
+                                json << "\"difference\":" << std::abs(totalArea - areaABC);
+                                json << "}";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
