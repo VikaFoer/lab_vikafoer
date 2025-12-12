@@ -4,6 +4,8 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <iomanip>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 
@@ -115,12 +117,128 @@ private:
 
         // Роутинг для лабораторних робіт
         if (path.find("/lab") == 0) {
-            // Витягуємо номер лабораторної (наприклад /lab1/index.html -> lab1/web/index.html)
             size_t slashPos = path.find('/', 4);
             if (slashPos != std::string::npos) {
                 std::string labNum = path.substr(1, slashPos - 1); // lab1, lab2, etc.
-                std::string filePath = path.substr(slashPos + 1); // index.html, style.css, etc.
+                std::string filePath = path.substr(slashPos + 1); // index.html, api/calculate, etc.
                 
+                // Обробка API endpoint для lab1
+                if (labNum == "lab1" && filePath.find("api/calculate") == 0) {
+                    // Проксуємо запит до логіки lab1
+                    size_t queryPos = filePath.find('?');
+                    std::string query = "";
+                    if (queryPos != std::string::npos) {
+                        query = filePath.substr(queryPos + 1);
+                    }
+                    
+                    // Парсимо параметри
+                    std::map<std::string, std::string> params;
+                    if (!query.empty()) {
+                        std::istringstream iss(query);
+                        std::string pair;
+                        while (std::getline(iss, pair, '&')) {
+                            size_t pos = pair.find('=');
+                            if (pos != std::string::npos) {
+                                std::string key = pair.substr(0, pos);
+                                std::string value = pair.substr(pos + 1);
+                                // URL decode
+                                std::string decoded;
+                                for (size_t i = 0; i < value.length(); ++i) {
+                                    if (value[i] == '%' && i + 2 < value.length()) {
+                                        try {
+                                            int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                            decoded += (char)hex;
+                                            i += 2;
+                                        } catch (...) {
+                                            decoded += value[i];
+                                        }
+                                    } else if (value[i] == '+') {
+                                        decoded += ' ';
+                                    } else {
+                                        decoded += value[i];
+                                    }
+                                }
+                                params[key] = decoded;
+                            }
+                        }
+                    }
+                    
+                    // Виконуємо розрахунки для lab1
+                    if (params.size() >= 5) {
+                        try {
+                            double v1 = std::stod(params.at("v1"));
+                            double s1 = std::stod(params.at("s1"));
+                            double v2 = std::stod(params.at("v2"));
+                            double s2 = std::stod(params.at("s2"));
+                            double v3 = std::stod(params.at("v3"));
+                            
+                            const double MIN_SPEED = 0.1;
+                            const double MAX_SPEED = 400.0;
+                            const double MIN_DISTANCE = 0.1;
+                            const double MAX_DISTANCE = 100000.0;
+                            
+                            if (v1 < MIN_SPEED || v1 > MAX_SPEED ||
+                                v2 < MIN_SPEED || v2 > MAX_SPEED ||
+                                v3 < MIN_SPEED || v3 > MAX_SPEED ||
+                                s1 < MIN_DISTANCE || s1 > MAX_DISTANCE ||
+                                s2 < MIN_DISTANCE || s2 > MAX_DISTANCE) {
+                                sendResponse(clientSocket, "{\"error\":\"Значення поза допустимим діапазоном\"}", "application/json");
+                                return;
+                            }
+                            
+                            double t = s1 / v2 + s2 / v3;
+                            double distance1 = v1 * t;
+                            double distance2 = s1 + s2;
+                            double totalDistance = distance1 + distance2;
+                            
+                            if (t <= 0) {
+                                sendResponse(clientSocket, "{\"error\":\"Час руху від'ємний або нульовий\"}", "application/json");
+                                return;
+                            }
+                            
+                            if (distance1 <= 0 || distance2 <= 0) {
+                                sendResponse(clientSocket, "{\"error\":\"Одна з відстаней від'ємна\"}", "application/json");
+                                return;
+                            }
+                            
+                            double fraction1 = distance1 / totalDistance;
+                            double fraction2 = distance2 / totalDistance;
+                            
+                            // Формуємо JSON відповідь
+                            std::ostringstream json;
+                            json << std::fixed << std::setprecision(4);
+                            json << "{";
+                            json << "\"success\":true,";
+                            json << "\"time\":" << t << ",";
+                            json << "\"timeHours\":" << (int)t << ",";
+                            json << "\"timeMinutes\":" << (int)((t - (int)t) * 60) << ",";
+                            json << "\"totalDistance\":" << totalDistance << ",";
+                            json << "\"car1\":{";
+                            json << "\"distance\":" << distance1 << ",";
+                            json << "\"fraction\":" << fraction1 << ",";
+                            json << "\"percentage\":" << (fraction1 * 100);
+                            json << "},";
+                            json << "\"car2\":{";
+                            json << "\"distance\":" << distance2 << ",";
+                            json << "\"fraction\":" << fraction2 << ",";
+                            json << "\"percentage\":" << (fraction2 * 100);
+                            json << "},";
+                            json << "\"warning\":" << (t > 8760 ? "true" : "false");
+                            json << "}";
+                            
+                            sendResponse(clientSocket, json.str(), "application/json");
+                            return;
+                        } catch (const std::exception& e) {
+                            sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                            return;
+                        }
+                    } else {
+                        sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                        return;
+                    }
+                }
+                
+                // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
                 }

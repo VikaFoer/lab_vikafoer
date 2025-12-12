@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         try {
-            const response = await fetch('/api/calculate?' + params.toString(), {
+            const response = await fetch('/lab1/api/calculate?' + params.toString(), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
