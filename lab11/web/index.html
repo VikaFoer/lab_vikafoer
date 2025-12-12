@@ -3,29 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторна робота 11</title>
+    <title>Лабораторна робота 11 - Рекурсивне обчислення НСД</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Лабораторна робота 11</h1>
-            <p>Веб-інтерфейс з C++ бекендом</p>
-        </header>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <span class="console-icon">▶</span>
+                <span>Лабораторна робота 11 - Рекурсивне обчислення НСД масиву</span>
+            </div>
+            <div class="console-controls">
+                <a href="/" class="back-btn" title="Повернутись до переліку лабораторних робіт">← Назад</a>
+                <span class="control-btn">─</span>
+                <span class="control-btn">□</span>
+                <span class="control-btn">×</span>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">
+                    <span class="prompt">C:\LAB__C++\lab11></span>
+                    <span class="command">gcd_array.exe</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">=== Рекурсивне обчислення НСД масиву ===</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Дано натуральні числа m, n₁, n₂, ..., nₘ (m>1).</span>
+                </div>
+                <div class="console-line">
+                    <span class="output">Обчислити НСД(n₁, n₂, ..., nₘ) рекурсивно.</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Властивість: НСД(n₁, n₂, ..., nₖ) = НСД(НСД(n₁, n₂, ..., nₖ₋₁), nₖ)</span>
+                </div>
+                <div class="console-line"></div>
+                <div class="console-line">
+                    <span class="output">Приклад: НСД(12, 18, 24) = НСД(НСД(12, 18), 24) = НСД(6, 24) = 6</span>
+                </div>
+            </div>
 
-        <main>
-            <section class="card">
-                <h2>Лабораторна робота 11</h2>
-                <p>Тут буде реалізовано функціональність для лабораторної роботи 11.</p>
-            </section>
-        </main>
+            <div class="form-container">
+                <form id="calculationForm">
+                    <div class="input-section">
+                        <h3 class="section-title">Введення чисел</h3>
+                        <div class="form-group">
+                            <label for="m">Кількість чисел m:</label>
+                            <input type="number" id="m" name="m" min="2" max="50" step="1" required 
+                                   placeholder="Наприклад: 5">
+                            <small class="form-hint">Діапазон: від 2 до 50</small>
+                        </div>
+                        <button type="button" id="generateNumbersBtn" class="btn-generate">Створити поля для чисел</button>
+                        <div id="numbersInputs" class="numbers-inputs"></div>
+                        <button type="submit" class="btn-calculate" style="display: none;">Обчислити НСД</button>
+                    </div>
+                </form>
 
-        <footer>
-            <p>Лабораторні роботи з C++ та веб-інтерфейсом</p>
-        </footer>
+                <div id="results" class="results-container" style="display: none;">
+                    <h3 class="results-title">=== РЕЗУЛЬТАТИ ===</h3>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-

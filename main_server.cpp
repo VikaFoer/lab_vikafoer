@@ -1456,6 +1456,178 @@ private:
                         }
                     }
                     
+                    // Обробка API endpoint для lab11
+                    if (labNum == "lab11" && filePath.find("api/calculate") == 0) {
+                        size_t queryPos = filePath.find('?');
+                        std::string query = "";
+                        if (queryPos != std::string::npos) {
+                            query = filePath.substr(queryPos + 1);
+                        }
+                        
+                        // Парсимо параметри
+                        std::map<std::string, std::string> params;
+                        if (!query.empty()) {
+                            std::istringstream iss(query);
+                            std::string pair;
+                            while (std::getline(iss, pair, '&')) {
+                                size_t pos = pair.find('=');
+                                if (pos != std::string::npos) {
+                                    std::string key = pair.substr(0, pos);
+                                    std::string value = pair.substr(pos + 1);
+                                    // URL decode
+                                    std::string decoded;
+                                    for (size_t i = 0; i < value.length(); ++i) {
+                                        if (value[i] == '%' && i + 2 < value.length()) {
+                                            try {
+                                                int hex = std::stoi(value.substr(i + 1, 2), nullptr, 16);
+                                                decoded += (char)hex;
+                                                i += 2;
+                                            } catch (...) {
+                                                decoded += value[i];
+                                            }
+                                        } else if (value[i] == '+') {
+                                            decoded += ' ';
+                                        } else {
+                                            decoded += value[i];
+                                        }
+                                    }
+                                    params[key] = decoded;
+                                }
+                            }
+                        }
+                        
+                        // Виконуємо обчислення для lab11 (рекурсивне обчислення НСД)
+                        if (params.find("m") != params.end()) {
+                            try {
+                                int m = std::stoi(params.at("m"));
+                                
+                                const int MIN_M = 2;
+                                const int MAX_M = 50;
+                                
+                                if (m < MIN_M || m > MAX_M) {
+                                    sendResponse(clientSocket, "{\"error\":\"m має бути в діапазоні [2; 50]\"}", "application/json");
+                                    return;
+                                }
+                                
+                                // Отримуємо масив чисел
+                                std::vector<int> numbers;
+                                for (int i = 0; i < m; ++i) {
+                                    std::string key = "n" + std::to_string(i + 1);
+                                    if (params.find(key) == params.end()) {
+                                        sendResponse(clientSocket, "{\"error\":\"Недостатньо елементів масиву\"}", "application/json");
+                                        return;
+                                    }
+                                    int value = std::stoi(params.at(key));
+                                    if (value < 1) {
+                                        sendResponse(clientSocket, "{\"error\":\"Всі числа мають бути натуральними (>= 1)\"}", "application/json");
+                                        return;
+                                    }
+                                    numbers.push_back(value);
+                                }
+                                
+                                // Функція для обчислення НСД двох чисел
+                                auto gcd = [](int a, int b) -> int {
+                                    if (b == 0) return a;
+                                    return gcd(b, a % b);
+                                };
+                                
+                                // Рекурсивна функція для обчислення НСД масиву
+                                struct StepInfo {
+                                    int step;
+                                    int start;
+                                    int end;
+                                    std::string type;
+                                    int leftGCD;
+                                    int rightValue;
+                                    int value;
+                                    int gcd;
+                                    std::string description;
+                                };
+                                
+                                std::vector<StepInfo> steps;
+                                int stepCounter = 0;
+                                
+                                std::function<int(int, int)> gcdArrayRecursive = [&](int start, int end) -> int {
+                                    stepCounter++;
+                                    StepInfo step;
+                                    step.step = stepCounter;
+                                    step.start = start;
+                                    step.end = end;
+                                    
+                                    // Базовий випадок
+                                    if (start == end) {
+                                        step.type = "base";
+                                        step.value = numbers[start];
+                                        step.gcd = numbers[start];
+                                        step.description = "Базовий випадок: один елемент";
+                                        steps.push_back(step);
+                                        return numbers[start];
+                                    }
+                                    
+                                    // Рекурсивний випадок
+                                    step.type = "recursive";
+                                    int leftGCD = gcdArrayRecursive(start, end - 1);
+                                    int rightValue = numbers[end];
+                                    int resultGCD = gcd(leftGCD, rightValue);
+                                    
+                                    step.leftGCD = leftGCD;
+                                    step.rightValue = rightValue;
+                                    step.gcd = resultGCD;
+                                    step.description = "НСД(НСД(n₁..nₖ₋₁), nₖ)";
+                                    steps.push_back(step);
+                                    
+                                    return resultGCD;
+                                };
+                                
+                                int finalGCD = gcdArrayRecursive(0, m - 1);
+                                
+                                std::ostringstream json;
+                                json << std::fixed;
+                                json << "{";
+                                json << "\"success\":true,";
+                                json << "\"m\":" << m << ",";
+                                json << "\"numbers\":[";
+                                for (int i = 0; i < m; ++i) {
+                                    if (i > 0) json << ",";
+                                    json << numbers[i];
+                                }
+                                json << "],";
+                                json << "\"finalGCD\":" << finalGCD << ",";
+                                json << "\"steps\":[";
+                                
+                                for (size_t i = 0; i < steps.size(); ++i) {
+                                    if (i > 0) json << ",";
+                                    json << "{";
+                                    json << "\"step\":" << steps[i].step << ",";
+                                    json << "\"start\":" << steps[i].start << ",";
+                                    json << "\"end\":" << steps[i].end << ",";
+                                    json << "\"type\":\"" << steps[i].type << "\",";
+                                    if (steps[i].type == "base") {
+                                        json << "\"value\":" << steps[i].value << ",";
+                                    } else {
+                                        json << "\"leftGCD\":" << steps[i].leftGCD << ",";
+                                        json << "\"rightValue\":" << steps[i].rightValue << ",";
+                                    }
+                                    json << "\"gcd\":" << steps[i].gcd << ",";
+                                    json << "\"description\":\"" << steps[i].description << "\"";
+                                    json << "}";
+                                }
+                                
+                                json << "]";
+                                json << "}";
+                                
+                                sendResponse(clientSocket, json.str(), "application/json");
+                                return;
+                            } catch (const std::exception& e) {
+                                sendResponse(clientSocket, "{\"error\":\"Помилка обробки даних\"}", "application/json");
+                                return;
+                            }
+                        } else {
+                            sendResponse(clientSocket, "{\"error\":\"Недостатньо параметрів\"}", "application/json");
+                            return;
+                        }
+                    }
+                    
                     // Обробка статичних файлів
                 if (filePath.empty() || filePath == "index.html" || filePath == "/") {
                     filePath = "index.html";
